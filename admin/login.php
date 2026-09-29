@@ -1,3 +1,9 @@
+<?php
+session_start();
+
+$pazinojums = $_SESSION["pazinojums"] ?? "";
+unset($_SESSION["pazinojums"]);
+?>
 <!DOCTYPE html>
 <html lang="lv" data-theme="light">
 <head>
@@ -34,25 +40,27 @@
 
     <h1 class="auth_h1">Ielogoties</h1>
 
-    <form class="auth__form" novalidate>
-      <label for="email">E-pasts</label>
+    <form class="auth__form" method="post" action="login_function.php">
+      <label for="lietotajs">Lietotājvārds</label>
       <div class="field">
-        <i class="fa-solid fa-envelope"></i>
-        <input id="email" name="email" type="email" placeholder="vards.uzvards@taksometrs.lv" required autocomplete="username">
+        <i class="fa-solid fa-user"></i>
+        <input id="lietotajs" name="lietotajs" type="text" placeholder="Lietotājvārds" required autocomplete="username">
       </div>
 
       <label for="pass">Parole</label>
       <div class="field">
         <i class="fa-solid fa-lock"></i>
-        <input id="pass" name="pass" type="password" placeholder="••••••••" required autocomplete="current-password">
+        <input id="pass" name="parole" type="password" placeholder="••••••••" required autocomplete="current-password">
         <button type="button" class="field__toggle" id="togglePass" aria-label="Rādīt paroli">
           <i class="fa-solid fa-eye"></i>
         </button>
       </div>
 
-      <p class="auth__error" id="authError" role="alert">Nepareizs e-pasts vai parole.</p>
+      <?php if(!empty($pazinojums)): ?>
+        <p class="auth__error" id="authError" role="alert" style="display:block;"><?= htmlspecialchars($pazinojums) ?></p>
+      <?php endif; ?>
 
-      <button class="btn" type="submit">
+      <button class="btn" type="submit" name="ielogoties">
         <i class="fa-solid fa-right-to-bracket"></i> Ielogoties
       </button>
     </form>

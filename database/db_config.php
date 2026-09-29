@@ -8,8 +8,5 @@
 
     if(!$savienojums){
         die("Nav izveidots savienojums ar datubāzi: " . mysqli_connect_error());
-    }else{
-        die("Ir izveidots savienojums ar datubāzi"());
     }
-
 ?>
