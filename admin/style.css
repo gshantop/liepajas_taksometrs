@@ -1,0 +1,266 @@
+:root {
+    --bg: #f6f5f0;
+    --surface: #ffffff;
+    --text: #16181d;
+    --muted: #5d6470;
+    --line: #dcdad0;
+    --accent: #f5b800;
+    --accent-ink: #16181d;
+    --road: #1d2026;
+    --danger: #d64545;
+    --shadow: 0 1px 2px rgba(20, 22, 26, .06), 0 20px 48px rgba(20, 22, 26, .14);
+}
+
+[data-theme="dark"] {
+    --bg: #12141a;
+    --surface: #1b1e26;
+    --text: #eceae2;
+    --muted: #a3a8b3;
+    --line: #2e323d;
+    --accent: #f5b800;
+    --accent-ink: #16181d;
+    --road: #0b0c10;
+    --danger: #ef6a6a;
+    --shadow: 0 1px 2px rgba(0, 0, 0, .5), 0 20px 48px rgba(0, 0, 0, .45);
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: 'Archivo', system-ui, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.5;
+    min-height: 100vh;
+    transition: background .3s, color .3s;
+}
+
+h1 {
+    font-family: 'Archivo Narrow', sans-serif;
+    font-size: 2rem;
+    margin-bottom: 8px;
+}
+
+a {
+    color: var(--accent);
+}
+
+:focus-visible {
+    outline: 3px solid var(--accent);
+    outline-offset: 2px;
+}
+
+/* Fona aina — ceļš ar marķējumu, atsauce uz klienta vietnes tēmu */
+.scene {
+    position: relative;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 32px 5%;
+    background: var(--road);
+    overflow: hidden;
+}
+
+.scene__road {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 90px;
+    background: linear-gradient(180deg, transparent, rgba(0, 0, 0, .25));
+}
+
+.scene__road::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 34px;
+    height: 6px;
+    background: repeating-linear-gradient(90deg, var(--accent) 0 48px, transparent 48px 96px);
+}
+
+/* Autorizācijas kartīte */
+.auth {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    max-width: 420px;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    padding: 40px 36px;
+    box-shadow: var(--shadow);
+}
+
+.auth__brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 28px;
+}
+
+.auth__logo {
+    display: grid;
+    place-items: center;
+    width: 44px;
+    height: 44px;
+    border-radius: 10px;
+    background: var(--accent);
+    color: var(--accent-ink);
+    font-size: 1.2rem;
+    flex: none;
+}
+
+.auth__brand strong {
+    display: block;
+    font-family: 'Archivo Narrow', sans-serif;
+    font-size: 1.05rem;
+}
+
+.auth_h1{
+    display: flex;
+    justify-content: center;
+}
+
+label {
+    display: block;
+    font-weight: 600;
+    font-size: .88rem;
+    margin: 16px 0 6px;
+}
+
+.field {
+    position: relative;
+    display: flex;
+    align-items: center;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    background: var(--bg);
+    transition: border-color .2s, box-shadow .2s;
+}
+
+.field:focus-within {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(245, 184, 0, .18);
+}
+
+.field i:first-child {
+    padding: 0 0 0 14px;
+    color: var(--muted);
+    font-size: .95rem;
+}
+
+.field input {
+    flex: 1;
+    min-width: 0;
+    border: 0;
+    background: transparent;
+    color: var(--text);
+    font: inherit;
+    padding: 12px 12px;
+    border-radius: 8px;
+}
+
+.field input:focus {
+    outline: none;
+}
+
+.field__toggle {
+    border: 0;
+    background: transparent;
+    color: var(--muted);
+    cursor: pointer;
+    padding: 0 14px;
+    height: 100%;
+    display: grid;
+    place-items: center;
+}
+
+.field__toggle:hover {
+    color: var(--text);
+}
+
+.auth__error {
+    display: none;
+    color: var(--danger);
+    font-size: .85rem;
+    font-weight: 600;
+    margin-top: 14px;
+    padding: 10px 12px;
+    background: color-mix(in srgb, var(--danger) 12%, transparent);
+    border-radius: 8px;
+}
+
+.btn {
+    width: 100%;
+    margin-top: 22px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    background: var(--accent);
+    color: var(--accent-ink);
+    font: 700 1rem 'Archivo', sans-serif;
+    border: 0;
+    border-radius: 8px;
+    padding: 13px;
+    cursor: pointer;
+    transition: transform .15s, box-shadow .15s;
+}
+
+.btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(245, 184, 0, .3);
+}
+
+.btn:active {
+    transform: translateY(0);
+}
+
+.theme-toggle {
+    position: absolute;
+    top: 24px;
+    right: 24px;
+    z-index: 2;
+    background: rgba(255, 255, 255, .06);
+    color: #f3f1ea;
+    border: 1px solid rgba(255, 255, 255, .25);
+    border-radius: 8px;
+    width: 40px;
+    height: 40px;
+    cursor: pointer;
+    display: grid;
+    place-items: center;
+    transition: background .2s, transform .1s;
+}
+
+.theme-toggle:hover {
+    background: rgba(255, 255, 255, .16);
+}
+
+.theme-toggle:active {
+    transform: scale(.94);
+}
+
+@media (max-width: 480px) {
+    .auth {
+        padding: 32px 24px;
+    }
+
+    .theme-toggle {
+        top: 14px;
+        right: 14px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    * {
+        transition: none !important;
+    }
+}
