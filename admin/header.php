@@ -26,7 +26,7 @@ if(!isset($_SESSION["lietotajvards_GSHT"])){
             <a href="braucieni.php" class="btn <?= $page == 'braucieni.php' ? 'active' : '' ?>">Braucieni</a>
             <a href="klienti.php" class="btn <?= $page == 'klienti.php' ? 'active' : '' ?>">Klienti</a>
             <a href="noreikini.php" class="btn <?= $page == 'noreikini.php' ? 'active' : '' ?>">Norēķini</a>
-            <a href="#" class="btn"><i class="fa-solid fa-user"></i> <?= htmlspecialchars($_SESSION["lietotajvards"]) ?></a>
+            <a href="#" class="btn"><i class="fa-solid fa-user"></i> <?= htmlspecialchars($_SESSION["lietotajvards_GSHT"]) ?></a>
             <a href="logout.php" class="btn"><i class="fas fa-power-off"></i></a>
         </nav>
     </header>

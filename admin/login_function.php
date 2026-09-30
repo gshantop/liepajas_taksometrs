@@ -16,15 +16,21 @@
             $lietotajs = $rezultats->fetch_assoc();
             if(password_verify($parole, $lietotajs["parole"])){
                 $_SESSION["lietotajvards_GSHT"] = $lietotajs["lietotajvards"];
-                header("Location: ./");
+                header("Location: ./main.php");
                 exit;
             }else if(!password_verify($parole, $lietotajs["parole"])){
                 $_SESSION["pazinojums"] = "Nepareizs lietotājvards vai parole!";
                 header("Location: login.php");
+                exit;
             }else{
                 $_SESSION["pazinojums"] = "Gaidiet apstiprinajumu";
                 header("Location: ./");
+                exit;
             }
+        }else{
+            $_SESSION["pazinojums"] = "Nepareizs lietotājvārds vai parole, vai konts nav aktīvs!";
+            header("Location: login.php");
+            exit;
         }
         
     }
