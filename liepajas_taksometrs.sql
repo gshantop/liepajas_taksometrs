@@ -71,3 +71,25 @@ COMMIT;
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
+
+
+CREATE TABLE `tarifi` (
+  `tarifs_id` int NOT NULL AUTO_INCREMENT,
+  `kods` varchar(10) NOT NULL,                -- 'eko', 'kom', 'uni', 'bus'
+  `nosaukums` varchar(50) NOT NULL,
+  `automasina` varchar(100) NOT NULL,         -- piemēram, 'Škoda Fabia / VW Polo'
+  `vietu_skaits` tinyint NOT NULL DEFAULT 4,
+  `iekrausanas_maksa` decimal(6,2) NOT NULL,  -- EUR
+  `cena_km` decimal(6,2) NOT NULL,            -- EUR par kilometru
+  `cena_min` decimal(6,2) NOT NULL,           -- EUR par gaidīšanas minūti
+  `birka` varchar(30) NOT NULL DEFAULT '',    -- 'Populārākā', 'Grupām'
+  `aktivs` tinyint(1) NOT NULL DEFAULT 1,
+  PRIMARY KEY (`tarifs_id`),
+  UNIQUE KEY `uq_tarifi_kods` (`kods`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+ 
+INSERT INTO `tarifi` (`tarifs_id`, `kods`, `nosaukums`, `automasina`, `vietu_skaits`, `iekrausanas_maksa`, `cena_km`, `cena_min`, `birka`, `aktivs`) VALUES
+(1, 'eko', 'Ekonomiskā',    'Škoda Fabia / VW Polo',        4, 1.50, 0.75, 0.10, '',           1),
+(2, 'kom', 'Komforta',      'Škoda Octavia / VW Passat',    4, 2.00, 0.95, 0.12, 'Populārākā', 1),
+(3, 'uni', 'Universālis',   'Škoda Superb Combi',           4, 2.50, 1.05, 0.15, '',           1),
+(4, 'bus', 'Mikroautobuss', 'VW Caravelle (līdz 8 vietām)', 8, 4.00, 1.35, 0.20, 'Grupām',     1);
