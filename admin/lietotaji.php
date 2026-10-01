@@ -1,6 +1,19 @@
 <?php
 // Ielādē kopīgo galveni (navigācija, CSS, fonti)
 require "header.php";
+require_once "../database/db_config.php";
+
+// Tikai Admin loma drīkst atvērt šo lapu
+$loma_sql = $savienojums->prepare("SELECT loma FROM darbinieki WHERE lietotajvards = ? AND statuss = 'aktīvs'");
+$loma_sql->bind_param("s", $_SESSION['lietotajvards_GSHT']);
+$loma_sql->execute();
+$esosa_loma = $loma_sql->get_result()->fetch_assoc();
+$loma_sql->close();
+
+if (!$esosa_loma || $esosa_loma['loma'] !== 'Admin') {
+    echo '<section class="admin-section"><div class="wrap"><h2>Piekļuve liegta</h2><p class="lead">Šī lapa ir pieejama tikai administratoriem.</p></div></section></body></html>';
+    exit;
+}
 ?>
 
 <!-- Lapas virsraksts un darbību josla -->
@@ -50,21 +63,21 @@ require "header.php";
         <form id="pieteikumuForma">
             <div class="form-elements">
                 <label for="lietotajvards">Lietotājvārds</label>
-                <input type="text" id="lietotajvards" required>
+                <input type="text" id="lietotajvards" maxlength="30" required>
 
                 <label for="vards">Vārds</label>
-                <input type="text" id="vards" required>
+                <input type="text" id="vards" maxlength="100" required>
 
                 <label for="uzvards">Uzvārds</label>
-                <input type="text" id="uzvards" required>
+                <input type="text" id="uzvards" maxlength="100" required>
 
                 <label for="epasts">E-pasta adrese</label>
-                <input type="email" id="epasts" required>
+                <input type="email" id="epasts" maxlength="100" required>
 
                 <label for="loma">Loma</label>
                 <select id="loma">
-                    <option value="Administrators">Administrators</option>
-                    <option value="Moderators">Moderators</option>
+                    <option value="Admin">Administrators</option>
+                    <option value="Moder">Moderators</option>
                 </select>
 
                 <label>Parole</label>
@@ -97,6 +110,6 @@ require "header.php";
     </div>
 </div>
 
-<script src="scripti/lietotaji-script.js?v=0.2"></script>
+<script src="scripti/lietotaji-script.js?v=0.3"></script>
 </body>
 </html>
