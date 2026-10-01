@@ -1,5 +1,4 @@
 <?php
-// Ielādē kopīgo galveni (navigācija, CSS, fonti)
 require "header.php";
 require_once "../database/db_config.php";
 
@@ -16,7 +15,6 @@ if (!$esosa_loma || $esosa_loma['loma'] !== 'Admin') {
 }
 ?>
 
-<!-- Lapas virsraksts un darbību josla -->
 <section class="admin-section">
     <div class="wrap">
         <div class="admin-topp">
@@ -30,7 +28,6 @@ if (!$esosa_loma || $esosa_loma['loma'] !== 'Admin') {
             </a>
         </div>
 
-        <!-- Lietotāju tabula (rindas ģenerē lietotaji-script.js) -->
         <div class="admin-main card">
             <div class="table-scroll">
                 <table class="admin-table">
@@ -53,7 +50,6 @@ if (!$esosa_loma || $esosa_loma['loma'] !== 'Admin') {
     </div>
 </section>
 
-<!-- Lietotāja pievienošanas / labošanas logs -->
 <div class="modal" id="modal-admin">
     <div class="modal-box">
         <div class="close-modal" data-target="#modal-admin">
@@ -95,7 +91,6 @@ if (!$esosa_loma || $esosa_loma['loma'] !== 'Admin') {
     </div>
 </div>
 
-<!-- Dzēšanas apstiprinājuma logs -->
 <div class="modal" id="deleteModal">
     <div class="modal-box modal-small">
         <div class="icon">
