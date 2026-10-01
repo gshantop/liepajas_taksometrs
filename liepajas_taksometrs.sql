@@ -117,3 +117,34 @@ INSERT INTO autoparks (numurs, marka, modelis, gads, krasa, vietu_skaits) VALUES
 ('RS0123', 'Mercedes-Benz', 'V-Class',       2022, 'Melna',      7),
 ('TU4567', 'Volkswagen',    'Caravelle',     2019, 'Balta',      8),
 ('VW8901', 'Hyundai',       'Ioniq',         2021, 'Zaļa',       4);
+
+CREATE TABLE soferi (
+    sofers_id INT AUTO_INCREMENT PRIMARY KEY,
+    vards VARCHAR(50) NOT NULL,
+    uzvards VARCHAR(50) NOT NULL,
+    talrunis VARCHAR(20) NOT NULL,
+    licences_nr VARCHAR(20) NOT NULL UNIQUE,
+    auto_id INT NULL,
+    statuss ENUM('aktīvs', 'dzēsts') NOT NULL DEFAULT 'aktīvs',
+    FOREIGN KEY (auto_id) REFERENCES autoparks(auto_id) ON DELETE SET NULL
+) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci;
+
+INSERT INTO soferi (vards, uzvards, talrunis, licences_nr, auto_id) VALUES
+('Jānis',  'Bērziņš', '+37120000001', 'LV1234567', 1),
+('Andris', 'Ozols',   '+37120000002', 'LV2345678', 2),
+('Mārtiņš','Kalniņš', '+37120000003', 'LV3456789', 3),
+('Edgars', 'Liepa',   '+37120000004', 'LV4567890', NULL);
+
+CREATE TABLE klienti (
+    klients_id INT AUTO_INCREMENT PRIMARY KEY,
+    vards VARCHAR(100) NOT NULL,
+    talrunis VARCHAR(20) NOT NULL UNIQUE,
+    epasts VARCHAR(100) NULL,
+    izveidots DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    statuss ENUM('aktīvs', 'dzēsts') NOT NULL DEFAULT 'aktīvs'
+) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci;
+
+INSERT INTO klienti (vards, talrunis, epasts) VALUES
+('Anna Siliņa',   '+37125000001', 'anna@example.com'),
+('Pēteris Krūmiņš','+37125000002', NULL),
+('Līga Vītola',   '+37125000003', 'liga@example.com');
