@@ -93,3 +93,27 @@ INSERT INTO `tarifi` (`tarifs_id`, `kods`, `nosaukums`, `automasina`, `vietu_ska
 (2, 'kom', 'Komforta',      'Škoda Octavia / VW Passat',    4, 2.00, 0.95, 0.12, 'Populārākā', 'aktīvs'),
 (3, 'uni', 'Universālis',   'Škoda Superb Combi',           4, 2.50, 1.05, 0.15, '',           'aktīvs'),
 (4, 'bus', 'Mikroautobuss', 'VW Caravelle (līdz 8 vietām)', 8, 4.00, 1.35, 0.20, 'Grupām',     'aktīvs');
+
+CREATE TABLE autoparks (
+    auto_id INT AUTO_INCREMENT PRIMARY KEY,
+    numurs VARCHAR(10) NOT NULL UNIQUE,
+    marka VARCHAR(50) NOT NULL,
+    modelis VARCHAR(50) NOT NULL,
+    gads SMALLINT NOT NULL,
+    krasa VARCHAR(30) NOT NULL DEFAULT '',
+    vietu_skaits TINYINT NOT NULL DEFAULT 4,
+    foto VARCHAR(255) NULL,
+    statuss ENUM('aktīvs', 'dzēsts') NOT NULL DEFAULT 'aktīvs'
+) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci;
+
+INSERT INTO autoparks (numurs, marka, modelis, gads, krasa, vietu_skaits) VALUES
+('AB1234', 'Toyota',        'Prius',         2020, 'Balta',      4),
+('CD5678', 'Skoda',         'Octavia',       2019, 'Melna',      4),
+('EF9012', 'Volkswagen',    'Passat',        2021, 'Pelēka',     4),
+('GH3456', 'Tesla',         'Model 3',       2022, 'Balta',      4),
+('JK7890', 'Toyota',        'Corolla',       2018, 'Sudraba',    4),
+('LM2345', 'Mercedes-Benz', 'E-Class',       2021, 'Melna',      4),
+('NP6789', 'Ford',          'Tourneo',       2020, 'Zila',       7),
+('RS0123', 'Mercedes-Benz', 'V-Class',       2022, 'Melna',      7),
+('TU4567', 'Volkswagen',    'Caravelle',     2019, 'Balta',      8),
+('VW8901', 'Hyundai',       'Ioniq',         2021, 'Zaļa',       4);
