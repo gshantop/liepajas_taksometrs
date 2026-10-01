@@ -34,6 +34,7 @@ $page = basename($_SERVER["PHP_SELF"]);
         <nav>
             <a href="main.php" class="btn <?= $page == 'main.php' ? 'active' : '' ?>">Kopsavilkums</a>
             <a href="autoparks.php" class="btn <?= $page == 'autoparks.php' ? 'active' : '' ?>">Auto parks</a>
+            <a href="soferi.php" class="btn <?= $page == 'soferi.php' ? 'active' : '' ?>">Šoferi</a>
             <a href="tarifi.php" class="btn <?= $page == 'tarifi.php' ? 'active' : '' ?>">Tarifi</a>
             <a href="lietotaji.php" class="btn <?= $page == 'lietotaji.php' ? 'active' : '' ?>">Lietotāji</a>
             <a href="#" class="btn"><i class="fa-solid fa-user"></i> <?= htmlspecialchars($_SESSION["lietotajvards_GSHT"]) ?></a>
