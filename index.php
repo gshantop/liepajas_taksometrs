@@ -1,4 +1,5 @@
 <?php
+// Pieslēgums datu bāzei
 require "database/db_config.php";
 ?>
 <!DOCTYPE html>
@@ -75,8 +76,41 @@ require "database/db_config.php";
     <div class="wrap">
       <h2>Tarifi</h2>
       <p class="lead">Izvēlies auto klasi. Cenas tiek ielādētas no tarifu saraksta un atjaunojas uzreiz.</p>
-      <div class="segment" id="filter" role="group" aria-label="Filtrs"></div>
-      <div class="grid g3" id="tariffs"></div>
+      <div class="segment" id="filter" role="group" aria-label="Filtrs">
+        <button type="button" data-v="all" class="on">Visi</button>
+        <button type="button" data-v="4">Līdz 4 vietām</button>
+        <button type="button" data-v="8">Grupām (8 vietas)</button>
+      </div>
+      <div class="grid g3" id="tariffs">
+        <?php
+          // Aktīvie tarifi no datu bāzes
+          $query = "SELECT nosaukums, automasina, vietu_skaits, iekrausanas_maksa, cena_km, cena_min, birka
+                    FROM tarifi
+                    WHERE statuss = 'aktīvs'
+                    ORDER BY tarifs_id";
+          $result = mysqli_query($savienojums, $query);
+
+          if ($result && mysqli_num_rows($result) > 0) {
+            while ($row = mysqli_fetch_assoc($result)) {
+        ?>
+        <article class="card" data-seats="<?php echo (int) $row['vietu_skaits']; ?>">
+          <?php if ($row['birka']) { ?><span class="tag"><?php echo htmlspecialchars($row['birka']); ?></span><?php } ?>
+          <h3><?php echo htmlspecialchars($row['nosaukums']); ?></h3>
+          <p><?php echo htmlspecialchars($row['automasina']); ?></p>
+          <div class="price"><?php echo number_format($row['cena_km'], 2, ',', ''); ?> € <span>/ km</span></div>
+          <ul>
+            <li>Iekāpšana: <?php echo number_format($row['iekrausanas_maksa'], 2, ',', ''); ?> €</li>
+            <li>Gaidīšana: <?php echo number_format($row['cena_min'], 2, ',', ''); ?> € / min</li>
+            <li>Vietu skaits: <?php echo (int) $row['vietu_skaits']; ?></li>
+          </ul>
+        </article>
+        <?php
+            }
+          } else {
+        ?>
+        <p class="fleet-state">Tarifi pašlaik nav pieejami.</p>
+        <?php } ?>
+      </div>
     </div>
   </section>
 
@@ -124,7 +158,23 @@ require "database/db_config.php";
     <div class="wrap">
       <h2>Klientu atsauksmes</h2>
       <p class="lead">Ko saka tie, kas jau braukuši.</p>
-      <div class="grid g3" id="reviews"></div>
+      <div class="grid g3" id="reviews">
+        <blockquote class="card">
+          <div class="stars" aria-label="5 no 5"><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i></div>
+          <p style="margin-top:8px">Auto atbrauca piecās minūtēs, vadītājs laipns, cena sakrita ar aprēķinu.</p>
+          <footer>— Anna K.</footer>
+        </blockquote>
+        <blockquote class="card">
+          <div class="stars" aria-label="5 no 5"><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i></div>
+          <p style="margin-top:8px">Vienmēr izmantoju lidostas transfēru — laikā un bez stresa.</p>
+          <footer>— Dmitrijs S.</footer>
+        </blockquote>
+        <blockquote class="card">
+          <div class="stars" aria-label="4 no 5"><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-regular fa-star"></i></div>
+          <p style="margin-top:8px">Tīrs salons un ērta pasūtīšana iepriekš. Ieteiktu draugiem.</p>
+          <footer>— Ilze B.</footer>
+        </blockquote>
+      </div>
     </div>
   </section>
 
