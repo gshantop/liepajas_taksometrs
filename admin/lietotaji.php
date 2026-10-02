@@ -59,13 +59,13 @@ if (!$esosa_loma || $esosa_loma['loma'] !== 'Admin') {
         <form id="pieteikumuForma">
             <div class="form-elements">
                 <label for="lietotajvards">Lietotājvārds</label>
-                <input type="text" id="lietotajvards" maxlength="30" required>
+                <input type="text" id="lietotajvards" data-ievade="lietotajvards" minlength="3" maxlength="30" pattern="[A-Za-z0-9._\-]{3,30}" title="3–30 simboli: latīņu burti, cipari, . _ -" required>
 
                 <label for="vards">Vārds</label>
-                <input type="text" id="vards" maxlength="100" required>
+                <input type="text" id="vards" data-ievade="vards" minlength="2" maxlength="50" pattern="\p{L}[\p{L} '\-]*" title="Tikai burti, atstarpes, defise un apostrofs" required>
 
                 <label for="uzvards">Uzvārds</label>
-                <input type="text" id="uzvards" maxlength="100" required>
+                <input type="text" id="uzvards" data-ievade="vards" minlength="2" maxlength="50" pattern="\p{L}[\p{L} '\-]*" title="Tikai burti, atstarpes, defise un apostrofs" required>
 
                 <label for="epasts">E-pasta adrese</label>
                 <input type="email" id="epasts" maxlength="100" required>
@@ -81,7 +81,7 @@ if (!$esosa_loma || $esosa_loma['loma'] !== 'Admin') {
                     Izveidot jaunu paroli <i class="fa-solid fa-arrow-turn-down"></i>
                 </a>
                 <div class="password" style="display: none;">
-                    <input type="password" id="parole" class="active" placeholder="Jaunā parole">
+                    <input type="password" id="parole" class="active" minlength="6" maxlength="72" pattern="\S{6,72}" placeholder="Jaunā parole (6–72 simboli, bez atstarpēm)" title="6–72 simboli, bez atstarpēm">
                 </div>
                 <input type="hidden" id="piet_ID">
             </div>

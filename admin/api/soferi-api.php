@@ -26,22 +26,25 @@ function kluda($kods, $teksts) {
 
 // Palīgfunkcija datu validācijai:
 function validet_laukus($pieteikums) {
-    $obligati_lauki = ['vards', 'uzvards', 'talrunis', 'licences_nr'];
-    foreach ($obligati_lauki as $lauks) {
-        if (!isset($pieteikums[$lauks]) || trim((string)$pieteikums[$lauks]) === '') {
-            kluda(400, "Lauks '$lauks' ir obligāts un nevar būt tukšs");
+    // Vārds un uzvārds: tikai burti, atstarpes, defise, apostrofs (2–50 simboli)
+    foreach (['vards' => 'Vārds', 'uzvards' => 'Uzvārds'] as $lauks => $nosaukums) {
+        $v = preg_replace('/\s+/u', ' ', trim((string) ($pieteikums[$lauks] ?? '')));
+        if ($v === '') kluda(400, "Lauks '$lauks' ir obligāts un nevar būt tukšs");
+        if (mb_strlen($v) < 2 || mb_strlen($v) > 50 || !preg_match('/^\p{L}[\p{L} \'\-]*$/u', $v)) {
+            kluda(400, "$nosaukums: tikai burti, atstarpes, defise un apostrofs (2–50 simboli)");
         }
     }
 
-    $limiti = ['vards' => 50, 'uzvards' => 50, 'talrunis' => 20, 'licences_nr' => 20];
-    foreach ($limiti as $lauks => $max) {
-        if (mb_strlen(trim($pieteikums[$lauks])) > $max) {
-            kluda(400, "Lauks '$lauks' nedrīkst būt garāks par $max simboliem");
-        }
+    $talrunis = trim((string) ($pieteikums['talrunis'] ?? ''));
+    if ($talrunis === '') kluda(400, "Lauks 'talrunis' ir obligāts un nevar būt tukšs");
+    if (!preg_match('/^[0-9]{8}$/', $talrunis)) {
+        kluda(400, "Tālruņa numuram jāsastāv tieši no 8 cipariem (bez +371)");
     }
 
-    if (!preg_match('/^\+?[0-9 ]{8,20}$/', trim($pieteikums['talrunis']))) {
-        kluda(400, "Nederīgs tālruņa numura formāts");
+    $licence = strtoupper(trim((string) ($pieteikums['licences_nr'] ?? '')));
+    if ($licence === '') kluda(400, "Lauks 'licences_nr' ir obligāts un nevar būt tukšs");
+    if (!preg_match('/^[A-Z]{2}[0-9]{7}$/', $licence)) {
+        kluda(400, "Apliecības numuram jābūt formātā: 2 burti un 7 cipari (piem., LV1234567)");
     }
 }
 

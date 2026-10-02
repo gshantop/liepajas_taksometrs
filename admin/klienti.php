@@ -41,10 +41,10 @@ require "header.php";
         <form id="pieteikumuForma">
             <div class="form-elements">
                 <label for="vards">Vārds</label>
-                <input type="text" id="vards" maxlength="100" required>
+                <input type="text" id="vards" data-ievade="vards" minlength="2" maxlength="100" pattern="\p{L}[\p{L} '\-]*" title="Tikai burti, atstarpes, defise un apostrofs" required>
 
-                <label for="talrunis">Tālrunis</label>
-                <input type="tel" id="talrunis" maxlength="20" required>
+                <label for="talrunis">Tālrunis (8 cipari)</label>
+                <input type="tel" id="talrunis" data-ievade="cipari" inputmode="numeric" minlength="8" maxlength="8" pattern="[0-9]{8}" placeholder="25000000" title="8 cipari, bez +371" required>
 
                 <label for="epasts">E-pasts</label>
                 <input type="email" id="epasts" maxlength="100">

@@ -34,31 +34,45 @@ if (!isset($_SESSION['lietotajvards_GSHT'])) {
 
 // Palīgfunkcija datu validācijai:
 // $parole_obligata = true (POST), false (PUT — parole nav obligāta)
-function validet_laukus($pieteikums, $parole_obligata = true) {
-    // Obligātie ievadlauki:
-    $obligati_lauki = ['lietotajvards', 'vards', 'uzvards', 'epasts', 'loma'];
-    if ($parole_obligata) $obligati_lauki[] = 'parole';
+function kluda($kods, $teksts) {
+    http_response_code($kods);
+    echo json_encode(["error" => $teksts]);
+    exit;
+}
 
-    foreach ($obligati_lauki as $lauks) {
-        if (!isset($pieteikums[$lauks]) || trim($pieteikums[$lauks]) === '') {
-            http_response_code(400); // Bad Request
-            echo json_encode(["error" => "Lauks '$lauks' ir obligāts un nevar būt tukšs"]);
-            exit;
+// Palīgfunkcija datu validācijai:
+// $parole_obligata = true (POST), false (PUT — parole nav obligāta)
+function validet_laukus($pieteikums, $parole_obligata = true) {
+    // Lietotājvārds: 3–30 simboli
+    $lietotajvards = trim((string) ($pieteikums['lietotajvards'] ?? ''));
+    if ($lietotajvards === '') kluda(400, "Lauks 'lietotajvards' ir obligāts un nevar būt tukšs");
+    if (!preg_match('/^[A-Za-z0-9._-]{3,30}$/', $lietotajvards)) {
+        kluda(400, "Lietotājvārds: 3–30 simboli (latīņu burti, cipari, punkts, apakšsvītra, defise)");
+    }
+
+    foreach (['vards' => 'Vārds', 'uzvards' => 'Uzvārds'] as $lauks => $nosaukums) {
+        $v = preg_replace('/\s+/u', ' ', trim((string) ($pieteikums[$lauks] ?? '')));
+        if ($v === '') kluda(400, "Lauks '$lauks' ir obligāts un nevar būt tukšs");
+        if (mb_strlen($v) < 2 || mb_strlen($v) > 50 || !preg_match('/^\p{L}[\p{L} \'\-]*$/u', $v)) {
+            kluda(400, "$nosaukums: tikai burti, atstarpes, defise un apostrofs (2–50 simboli)");
         }
     }
 
-    // E-pasta validācija:
-    if (!filter_var(trim($pieteikums['epasts']), FILTER_VALIDATE_EMAIL)) {
-        http_response_code(400); // Bad Request
-        echo json_encode(["error" => "Nederīgs e-pasta formāts"]);
-        exit;
+    $epasts = trim((string) ($pieteikums['epasts'] ?? ''));
+    if ($epasts === '') kluda(400, "Lauks 'epasts' ir obligāts un nevar būt tukšs");
+    if (mb_strlen($epasts) > 100 || !filter_var($epasts, FILTER_VALIDATE_EMAIL)) {
+        kluda(400, "Nederīgs e-pasta formāts");
     }
 
-    // Lomas validācija (enum 'Admin', 'Moder'):
-    if (!in_array($pieteikums['loma'], ['Admin', 'Moder'], true)) {
-        http_response_code(400); // Bad Request
-        echo json_encode(["error" => "Loma var būt tikai Admin vai Moder"]);
-        exit;
+    $parole = (string) ($pieteikums['parole'] ?? '');
+    if (trim($parole) === '') {
+        if ($parole_obligata) kluda(400, "Lauks 'parole' ir obligāts un nevar būt tukšs");
+    } elseif (strlen($parole) < 6 || strlen($parole) > 72 || preg_match('/\s/', $parole)) {
+        kluda(400, "Parolei jābūt 6–72 simbolus garai, bez atstarpēm");
+    }
+
+    if (!in_array($pieteikums['loma'] ?? '', ['Admin', 'Moder'], true)) {
+        kluda(400, "Loma var būt tikai Admin vai Moder");
     }
 }
 

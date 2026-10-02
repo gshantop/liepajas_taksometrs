@@ -29,31 +29,35 @@ function kluda($kods, $teksts) {
 
 // Palīgfunkcija datu validācijai:
 function validet_laukus($pieteikums) {
-    // Obligātie ievadlauki:
-    $obligati_lauki = ['numurs', 'marka', 'modelis', 'gads', 'vietu_skaits'];
-    foreach ($obligati_lauki as $lauks) {
-        if (!isset($pieteikums[$lauks]) || trim((string)$pieteikums[$lauks]) === '') {
-            kluda(400, "Lauks '$lauks' ir obligāts un nevar būt tukšs");
+    // Valsts numurs: latīņu burti un cipari, līdz 8 simboliem, ne vairāk kā 4 cipari
+    $numurs = strtoupper(trim((string) ($pieteikums['numurs'] ?? '')));
+    if ($numurs === '') kluda(400, "Lauks 'numurs' ir obligāts un nevar būt tukšs");
+    if (!preg_match('/^[A-Z0-9]{1,8}$/', $numurs)) {
+        kluda(400, "Valsts numurs: tikai latīņu burti un cipari, līdz 8 simboliem");
+    }
+    if (preg_match_all('/[0-9]/', $numurs) > 4) {
+        kluda(400, "Valsts numurā drīkst būt ne vairāk kā 4 cipari");
+    }
+
+    foreach (['marka' => 2, 'modelis' => 1] as $lauks => $min) {
+        $v = preg_replace('/\s+/u', ' ', trim((string) ($pieteikums[$lauks] ?? '')));
+        if ($v === '') kluda(400, "Lauks '$lauks' ir obligāts un nevar būt tukšs");
+        if (mb_strlen($v) < $min || mb_strlen($v) > 50 || !preg_match('/^[\p{L}\p{N}][\p{L}\p{N} .\-]*$/u', $v)) {
+            kluda(400, "Lauks '$lauks': tikai burti, cipari, atstarpes, punkts un defise ($min–50 simboli)");
         }
     }
 
-    // Teksta garuma ierobežojumi pēc tabulas struktūras:
-    $limiti = ['numurs' => 10, 'marka' => 50, 'modelis' => 50, 'krasa' => 30];
-    foreach ($limiti as $lauks => $max) {
-        if (isset($pieteikums[$lauks]) && mb_strlen(trim($pieteikums[$lauks])) > $max) {
-            kluda(400, "Lauks '$lauks' nedrīkst būt garāks par $max simboliem");
-        }
+    $krasa = preg_replace('/\s+/u', ' ', trim((string) ($pieteikums['krasa'] ?? '')));
+    if ($krasa !== '' && (mb_strlen($krasa) < 2 || mb_strlen($krasa) > 30 || !preg_match('/^\p{L}[\p{L} \-]*$/u', $krasa))) {
+        kluda(400, "Krāsa: tikai burti, atstarpes un defise (2–30 simboli)");
     }
 
-    // Gads:
     $max_gads = (int) date('Y') + 1;
-    if (filter_var($pieteikums['gads'], FILTER_VALIDATE_INT, ["options" => ["min_range" => 1990, "max_range" => $max_gads]]) === false) {
+    if (filter_var($pieteikums['gads'] ?? null, FILTER_VALIDATE_INT, ["options" => ["min_range" => 1990, "max_range" => $max_gads]]) === false) {
         kluda(400, "Gadam jābūt no 1990 līdz $max_gads");
     }
-
-    // Vietu skaits (tinyint):
-    if (filter_var($pieteikums['vietu_skaits'], FILTER_VALIDATE_INT, ["options" => ["min_range" => 1, "max_range" => 99]]) === false) {
-        kluda(400, "Vietu skaitam jābūt veselam skaitlim no 1 līdz 99");
+    if (filter_var($pieteikums['vietu_skaits'] ?? null, FILTER_VALIDATE_INT, ["options" => ["min_range" => 2, "max_range" => 9]]) === false) {
+        kluda(400, "Vietu skaitam jābūt veselam skaitlim no 2 līdz 9");
     }
 }
 

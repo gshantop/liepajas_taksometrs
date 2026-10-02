@@ -3,7 +3,7 @@ header("Content-Type: application/json; charset=UTF-8");
 
 require "../../database/db_config.php";
 
-mysqli_report(MYSQLI_REPORT_OFF);
+mysqli_report(MYSQLI_REPORT_OFF); // mysqli neizmet izņēmumus — kļūdas apstrādā kods (piem., dublikāts 1062)
 
 if ($savienojums->connect_error) {
     http_response_code(500); // Internal Server Error
@@ -18,51 +18,84 @@ if (!isset($_SESSION['lietotajvards_GSHT'])) {
     exit;
 }
 
+function kluda($kods, $teksts) {
+    http_response_code($kods);
+    echo json_encode(["error" => $teksts]);
+    exit;
+}
+
 // Palīgfunkcija datu validācijai:
 function validet_laukus($pieteikums) {
-    // Obligātie ievadlauki:
-    $obligati_lauki = ['kods', 'nosaukums', 'automasina', 'vietu_skaits', 'iekrausanas_maksa', 'cena_km', 'cena_min'];
-    foreach ($obligati_lauki as $lauks) {
-        if (!isset($pieteikums[$lauks]) || trim((string)$pieteikums[$lauks]) === '') {
-            http_response_code(400); // Bad Request
-            echo json_encode(["error" => "Lauks '$lauks' ir obligāts un nevar būt tukšs"]);
-            exit;
+
+    $kods = strtolower(trim((string) ($pieteikums['kods'] ?? '')));
+    if ($kods === '') kluda(400, "Lauks 'kods' ir obligāts un nevar būt tukšs");
+    if (!preg_match('/^[a-z0-9]{2,10}$/', $kods)) {
+        kluda(400, "Kodam jāsastāv no 2–10 latīņu burtiem un cipariem");
+    }
+
+    $nosaukums = preg_replace('/\s+/u', ' ', trim((string) ($pieteikums['nosaukums'] ?? '')));
+    if ($nosaukums === '') kluda(400, "Lauks 'nosaukums' ir obligāts un nevar būt tukšs");
+    if (mb_strlen($nosaukums) < 2 || mb_strlen($nosaukums) > 50 || !preg_match('/^[\p{L}\p{N}][\p{L}\p{N} .,()\/\-–]*$/u', $nosaukums)) {
+        kluda(400, "Nosaukums: tikai burti, cipari, atstarpes un simboli . , ( ) / - (2–50 simboli)");
+    }
+
+    if (filter_var($pieteikums['auto_id'] ?? null, FILTER_VALIDATE_INT, ["options" => ["min_range" => 1]]) === false) {
+        kluda(400, "Jāizvēlas automašīna no autoparka");
+    }
+
+    foreach ([['iekrausanas_maksa', 0, 100], ['cena_km', 0.01, 50], ['cena_min', 0, 10]] as [$lauks, $min, $max]) {
+        $v = trim((string) ($pieteikums[$lauks] ?? ''));
+        if (!preg_match('/^[0-9]+(\.[0-9]{1,2})?$/', $v) || $v < $min || $v > $max) {
+            kluda(400, "Lauks '$lauks' jābūt skaitlim no $min līdz $max (līdz 2 cipariem aiz komata)");
         }
     }
 
-    // Teksta garuma ierobežojumi pēc tabulas struktūras:
-    $limiti = ['kods' => 10, 'nosaukums' => 50, 'automasina' => 100, 'birka' => 30];
-    foreach ($limiti as $lauks => $max) {
-        if (isset($pieteikums[$lauks]) && mb_strlen(trim($pieteikums[$lauks])) > $max) {
-            http_response_code(400); // Bad Request
-            echo json_encode(["error" => "Lauks '$lauks' nedrīkst būt garāks par $max simboliem"]);
-            exit;
-        }
+    $birka = preg_replace('/\s+/u', ' ', trim((string) ($pieteikums['birka'] ?? '')));
+    if ($birka !== '' && (mb_strlen($birka) > 30 || !preg_match('/^[\p{L}\p{N}][\p{L}\p{N} .,\-]*$/u', $birka))) {
+        kluda(400, "Birka: tikai burti, cipari, atstarpes un simboli . , - (līdz 30 simboliem)");
     }
+}
 
-    // Vietu skaits (tinyint):
-    if (filter_var($pieteikums['vietu_skaits'], FILTER_VALIDATE_INT, ["options" => ["min_range" => 1, "max_range" => 99]]) === false) {
-        http_response_code(400); // Bad Request
-        echo json_encode(["error" => "Vietu skaitam jābūt veselam skaitlim no 1 līdz 99"]);
-        exit;
-    }
+// Atrod izvēlēto automašīnu autoparkā un atgriež tās datus (automasina teksts un vietu skaits)
+function atrast_auto($auto_id) {
+    global $savienojums;
 
-    // Cenas (decimal(6,2) — līdz 9999.99):
-    foreach (['iekrausanas_maksa', 'cena_km', 'cena_min'] as $lauks) {
-        if (!is_numeric($pieteikums[$lauks]) || $pieteikums[$lauks] < 0 || $pieteikums[$lauks] > 9999.99) {
-            http_response_code(400); // Bad Request
-            echo json_encode(["error" => "Lauks '$lauks' jābūt skaitlim no 0 līdz 9999.99"]);
-            exit;
-        }
-    }
+    $sql = $savienojums->prepare("SELECT marka, modelis, vietu_skaits FROM autoparks WHERE auto_id = ? AND statuss = 'aktīvs'");
+    $sql->bind_param("i", $auto_id);
+    $sql->execute();
+    $auto = $sql->get_result()->fetch_assoc();
+    $sql->close();
+
+    if (!$auto) kluda(400, "Izvēlētā automašīna nav atrasta autoparkā");
+
+    return [
+        'automasina'   => mb_substr($auto['marka'] . ' ' . $auto['modelis'], 0, 100),
+        'vietu_skaits' => (int) $auto['vietu_skaits']
+    ];
 }
 
 $metode = $_SERVER['REQUEST_METHOD'];
 
+$izvele = "SELECT t.tarifs_id, t.kods, t.nosaukums, t.auto_id, t.automasina,
+                  COALESCE(a.vietu_skaits, t.vietu_skaits) AS vietu_skaits,
+                  t.iekrausanas_maksa, t.cena_km, t.cena_min, t.birka, t.statuss,
+                  a.numurs AS auto_numurs, a.marka, a.modelis
+           FROM tarifi t
+           LEFT JOIN autoparks a ON a.auto_id = t.auto_id";
+
 if ($metode === 'GET') {
-    if (isset($_GET['id'])) {
+    if (isset($_GET['auto_saraksts'])) {
+        // Automašīnu saraksts izvēlnei
+        $rezultats = $savienojums->query("SELECT auto_id, numurs, marka, modelis, vietu_skaits FROM autoparks WHERE statuss = 'aktīvs' ORDER BY marka, modelis, numurs");
+        $autos = [];
+        while ($auto = $rezultats->fetch_assoc()) {
+            $autos[] = $auto;
+        }
+        echo json_encode($autos);
+    }
+    elseif (isset($_GET['id'])) {
         $id = (int) $_GET['id'];
-        $sql = $savienojums->prepare("SELECT * FROM tarifi WHERE tarifs_id =? AND statuss = 'aktīvs'");
+        $sql = $savienojums->prepare("$izvele WHERE t.tarifs_id = ? AND t.statuss = 'aktīvs'");
         $sql->bind_param("i", $id);
         $sql->execute();
         $rezultats = $sql->get_result();
@@ -70,12 +103,11 @@ if ($metode === 'GET') {
         if ($pieteikums = $rezultats->fetch_assoc()) {
             echo json_encode($pieteikums);
         } else {
-            http_response_code(404); // Not Found
-            echo json_encode(["error" => "Tarifs nav atrasts"]);
+            kluda(404, "Tarifs nav atrasts");
         }
         $sql->close();
     } else {
-        $rezultats = $savienojums->query("SELECT * FROM tarifi WHERE statuss = 'aktīvs' ORDER BY tarifs_id DESC");
+        $rezultats = $savienojums->query("$izvele WHERE t.statuss = 'aktīvs' ORDER BY t.tarifs_id DESC");
         $pieteikumi = [];
         while ($pieteikums = $rezultats->fetch_assoc()) {
             $pieteikumi[] = $pieteikums;
@@ -85,122 +117,93 @@ if ($metode === 'GET') {
 }
 elseif ($metode === 'POST') {
     $pieteikums = json_decode(file_get_contents("php://input"), true);
-
-    if (!$pieteikums) {
-        http_response_code(400); // Bad Request
-        echo json_encode(["error" => "Nederīgs JSON"]);
-        exit;
-    }
+    if (!$pieteikums) kluda(400, "Nederīgs JSON");
 
     validet_laukus($pieteikums);
 
-    $kods = trim($pieteikums['kods']);
+    $kods = strtolower(trim($pieteikums['kods']));
     $nosaukums = trim($pieteikums['nosaukums']);
-    $automasina = trim($pieteikums['automasina']);
-    $vietu_skaits = (int) $pieteikums['vietu_skaits'];
+    $auto_id = (int) $pieteikums['auto_id'];
+    $auto = atrast_auto($auto_id);
+    $automasina = $auto['automasina'];
+    $vietu_skaits = $auto['vietu_skaits'];
     $iekrausanas_maksa = (float) $pieteikums['iekrausanas_maksa'];
     $cena_km = (float) $pieteikums['cena_km'];
     $cena_min = (float) $pieteikums['cena_min'];
     $birka = trim($pieteikums['birka'] ?? '');
 
-    $sql = $savienojums->prepare("INSERT INTO tarifi (kods, nosaukums, automasina, vietu_skaits, iekrausanas_maksa, cena_km, cena_min, birka) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
-    $sql->bind_param("sssiddds", $kods, $nosaukums, $automasina, $vietu_skaits, $iekrausanas_maksa, $cena_km, $cena_min, $birka);
+    $sql = $savienojums->prepare("INSERT INTO tarifi (kods, nosaukums, auto_id, automasina, vietu_skaits, iekrausanas_maksa, cena_km, cena_min, birka) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
+    $sql->bind_param("ssisiddds", $kods, $nosaukums, $auto_id, $automasina, $vietu_skaits, $iekrausanas_maksa, $cena_km, $cena_min, $birka);
 
     if ($sql->execute()) {
         http_response_code(201); // Created
         echo json_encode(["message" => "Tarifs pievienots", "tarifs_id" => $sql->insert_id]);
     } else {
         if ($sql->errno === 1062) {
-            http_response_code(409); // Conflict
-            echo json_encode(["error" => "Tarifs ar šādu kodu jau eksistē"]);
+            kluda(409, "Tarifs ar šādu kodu jau eksistē");
         } else {
-            http_response_code(500); // Internal Server Error
-            echo json_encode(["error" => "Neizdevās pievienot tarifu datubāzē"]);
+            kluda(500, "Neizdevās pievienot tarifu datubāzē");
         }
     }
     $sql->close();
 }
 elseif ($metode === 'PUT') {
-    if (!isset($_GET['id'])) {
-        http_response_code(400); // Bad Request
-        echo json_encode(["error" => "Nepieciešams ID"]);
-        exit;
-    }
+    if (!isset($_GET['id'])) kluda(400, "Nepieciešams ID");
     $id = (int) $_GET['id'];
 
-    $parbaude = $savienojums->prepare("SELECT tarifs_id FROM tarifi WHERE tarifs_id =? AND statuss = 'aktīvs'");
+    $parbaude = $savienojums->prepare("SELECT tarifs_id FROM tarifi WHERE tarifs_id = ? AND statuss = 'aktīvs'");
     $parbaude->bind_param("i", $id);
     $parbaude->execute();
     if ($parbaude->get_result()->num_rows === 0) {
-        http_response_code(404); // Not Found
-        echo json_encode(["error" => "Tarifs ar norādīto ID nav atrasts"]);
-        exit;
+        kluda(404, "Tarifs ar norādīto ID nav atrasts");
     }
     $parbaude->close();
 
     $pieteikums = json_decode(file_get_contents("php://input"), true);
-
-    if (!$pieteikums) {
-        http_response_code(400); // Bad Request
-        echo json_encode(["error" => "Nederīgs JSON"]);
-        exit;
-    }
+    if (!$pieteikums) kluda(400, "Nederīgs JSON");
 
     validet_laukus($pieteikums);
 
-    $kods = trim($pieteikums['kods']);
+    $kods = strtolower(trim($pieteikums['kods']));
     $nosaukums = trim($pieteikums['nosaukums']);
-    $automasina = trim($pieteikums['automasina']);
-    $vietu_skaits = (int) $pieteikums['vietu_skaits'];
+    $auto_id = (int) $pieteikums['auto_id'];
+    $auto = atrast_auto($auto_id);
+    $automasina = $auto['automasina'];
+    $vietu_skaits = $auto['vietu_skaits'];
     $iekrausanas_maksa = (float) $pieteikums['iekrausanas_maksa'];
     $cena_km = (float) $pieteikums['cena_km'];
     $cena_min = (float) $pieteikums['cena_min'];
     $birka = trim($pieteikums['birka'] ?? '');
 
-    $sql = $savienojums->prepare("UPDATE tarifi SET kods=?, nosaukums=?, automasina=?, vietu_skaits=?, iekrausanas_maksa=?, cena_km=?, cena_min=?, birka=? WHERE tarifs_id =?");
-    $sql->bind_param("sssidddsi", $kods, $nosaukums, $automasina, $vietu_skaits, $iekrausanas_maksa, $cena_km, $cena_min, $birka, $id);
+    $sql = $savienojums->prepare("UPDATE tarifi SET kods=?, nosaukums=?, auto_id=?, automasina=?, vietu_skaits=?, iekrausanas_maksa=?, cena_km=?, cena_min=?, birka=? WHERE tarifs_id = ?");
+    $sql->bind_param("ssisidddsi", $kods, $nosaukums, $auto_id, $automasina, $vietu_skaits, $iekrausanas_maksa, $cena_km, $cena_min, $birka, $id);
 
     if ($sql->execute()) {
         echo json_encode(["message" => "Tarifs atjaunots"]);
     } else {
         if ($sql->errno === 1062) {
-            http_response_code(409); // Conflict
-            echo json_encode(["error" => "Tarifs ar šādu kodu jau eksistē"]);
+            kluda(409, "Tarifs ar šādu kodu jau eksistē");
         } else {
-            http_response_code(500); // Internal Server Error
-            echo json_encode(["error" => "Neizdevās atjaunot tarifu"]);
+            kluda(500, "Neizdevās atjaunot tarifu");
         }
     }
     $sql->close();
 }
 elseif ($metode === 'DELETE') {
-    if (!isset($_GET['id'])) {
-        http_response_code(400); // Bad Request
-        echo json_encode(["error" => "Nepieciešams ID"]);
-        exit;
-    }
+    if (!isset($_GET['id'])) kluda(400, "Nepieciešams ID");
     $id = (int) $_GET['id'];
-    $sql = $savienojums->prepare("UPDATE tarifi SET statuss = 'dzēsts' WHERE tarifs_id =? AND statuss = 'aktīvs'");
+
+    $sql = $savienojums->prepare("UPDATE tarifi SET statuss = 'dzēsts' WHERE tarifs_id = ? AND statuss = 'aktīvs'");
     $sql->bind_param("i", $id);
 
-    if (!$sql->execute()) {
-        http_response_code(500); // Internal Server Error
-        echo json_encode(["error" => "Neizdevās dzēst tarifu"]);
-        exit;
-    }
-
-    if ($sql->affected_rows === 0) {
-        http_response_code(404); // Not Found
-        echo json_encode(["error" => "Tarifs nav atrasts"]);
-        exit;
-    }
+    if (!$sql->execute()) kluda(500, "Neizdevās dzēst tarifu");
+    if ($sql->affected_rows === 0) kluda(404, "Tarifs nav atrasts");
 
     echo json_encode(["message" => "Tarifs veiksmīgi dzēsts"]);
     $sql->close();
 }
 else {
-    http_response_code(405); // Method Not Allowed
-    echo json_encode(["error" => "Metode nav atbalstīta"]);
+    kluda(405, "Metode nav atbalstīta");
 }
 
 $savienojums->close();

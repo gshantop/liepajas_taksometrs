@@ -7,7 +7,7 @@ require "header.php";
         <div class="admin-topp">
             <div>
                 <h2>Tarifi</h2>
-                <p class="lead">Pārvaldi tarifus.</p>
+                <p class="lead">Pārvaldi tarifus. Automašīna tiek izvēlēta no autoparka.</p>
             </div>
             <a class="btn" id="new-btn" href="#">
                 <i class="fa fa-plus"></i>
@@ -23,7 +23,8 @@ require "header.php";
                             <th>ID</th>
                             <th>Kods</th>
                             <th>Nosaukums</th>
-                            <th>Automašina</th>
+                            <th>Automašīna</th>
+                            <th>Vietas</th>
                             <th>Cena km</th>
                             <th>Cena min</th>
                             <th>Birka</th>
@@ -48,28 +49,25 @@ require "header.php";
         <form id="pieteikumuForma">
             <div class="form-elements">
                 <label for="kods">Kods</label>
-                <input type="text" id="kods" maxlength="10" required>
+                <input type="text" id="kods" data-ievade="kods" minlength="2" maxlength="10" pattern="[a-z0-9]{2,10}" title="2–10 latīņu burti vai cipari" required>
 
                 <label for="nosaukums">Nosaukums</label>
-                <input type="text" id="nosaukums" maxlength="50" required>
+                <input type="text" id="nosaukums" data-ievade="nosaukums" minlength="2" maxlength="50" pattern="[\p{L}\p{N}][\p{L}\p{N} .,\(\)\/\-–]*" title="Burti, cipari, atstarpes un simboli . , ( ) / -" required>
 
-                <label for="automasina">Automašina</label>
-                <input type="text" id="automasina" maxlength="100" required>
-
-                <label for="vietu_skaits">Vietu skaits</label>
-                <input type="number" id="vietu_skaits" min="1" max="99" value="4" required>
+                <label for="auto_id">Automašīna (no autoparka)</label>
+                <select id="auto_id" required></select>
 
                 <label for="iekrausanas_maksa">Iekāpšanas maksa (€)</label>
-                <input type="number" id="iekrausanas_maksa" min="0" max="9999.99" step="0.01" required>
+                <input type="number" id="iekrausanas_maksa" min="0" max="100" step="0.01" required>
 
                 <label for="cena_km">Cena par km (€)</label>
-                <input type="number" id="cena_km" min="0" max="9999.99" step="0.01" required>
+                <input type="number" id="cena_km" min="0.01" max="50" step="0.01" required>
 
                 <label for="cena_min">Cena par min (€)</label>
-                <input type="number" id="cena_min" min="0" max="9999.99" step="0.01" required>
+                <input type="number" id="cena_min" min="0" max="10" step="0.01" required>
 
                 <label for="birka">Birka</label>
-                <input type="text" id="birka" maxlength="30">
+                <input type="text" id="birka" data-ievade="birka" maxlength="30" pattern="[\p{L}\p{N}][\p{L}\p{N} .,\-]*" title="Burti, cipari, atstarpes un simboli . , -">
 
                 <input type="hidden" id="piet_ID">
             </div>
@@ -94,6 +92,6 @@ require "header.php";
     </div>
 </div>
 
-<script src="scripti/tarifi-script.js?v=0.1"></script>
+<script src="scripti/tarifi-script.js?v=0.2"></script>
 </body>
 </html>

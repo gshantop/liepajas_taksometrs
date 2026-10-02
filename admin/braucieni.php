@@ -52,10 +52,10 @@ require "header.php";
                 <select id="klients_id" required></select>
 
                 <label for="no_adrese">No adreses</label>
-                <input type="text" id="no_adrese" maxlength="150" required>
+                <input type="text" id="no_adrese" data-ievade="adrese" minlength="3" maxlength="150" pattern="[\p{L}\p{N}][\p{L}\p{N} .,\(\)\/\-]*" title="Burti, cipari, atstarpes un simboli . , ( ) / -" required>
 
                 <label for="uz_adrese">Uz adresi</label>
-                <input type="text" id="uz_adrese" maxlength="150" required>
+                <input type="text" id="uz_adrese" data-ievade="adrese" minlength="3" maxlength="150" pattern="[\p{L}\p{N}][\p{L}\p{N} .,\(\)\/\-]*" title="Burti, cipari, atstarpes un simboli . , ( ) / -" required>
 
                 <label for="tarifs_id">Tarifs</label>
                 <select id="tarifs_id" required></select>
@@ -64,10 +64,10 @@ require "header.php";
                 <select id="sofers_id"></select>
 
                 <label for="km">Nobraukums (km)</label>
-                <input type="number" id="km" min="0" max="9999.99" step="0.01">
+                <input type="number" id="km" min="0" max="1000" step="0.01">
 
                 <label for="minutes">Brauciena ilgums (min)</label>
-                <input type="number" id="minutes" min="0" max="9999" step="1">
+                <input type="number" id="minutes" min="0" max="1440" step="1">
 
                 <p id="cenaPreview" style="font-weight:600; margin:4px 0;"></p>
 

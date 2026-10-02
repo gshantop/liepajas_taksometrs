@@ -49,22 +49,22 @@ require "header.php";
         <form id="pieteikumuForma">
             <div class="form-elements">
                 <label for="numurs">Valsts numurs</label>
-                <input type="text" id="numurs" maxlength="10" required>
+                <input type="text" id="numurs" data-ievade="numurs" maxlength="8" pattern="[A-Z0-9]{1,8}" placeholder="AB1234" title="Līdz 8 simboliem: latīņu burti un ne vairāk kā 4 cipari" required>
 
                 <label for="marka">Marka</label>
-                <input type="text" id="marka" maxlength="50" required>
+                <input type="text" id="marka" data-ievade="marka" minlength="2" maxlength="50" pattern="[\p{L}\p{N}][\p{L}\p{N} .\-]*" title="Burti, cipari, atstarpes, punkts, defise" required>
 
                 <label for="modelis">Modelis</label>
-                <input type="text" id="modelis" maxlength="50" required>
+                <input type="text" id="modelis" data-ievade="marka" maxlength="50" pattern="[\p{L}\p{N}][\p{L}\p{N} .\-]*" title="Burti, cipari, atstarpes, punkts, defise" required>
 
                 <label for="gads">Izlaiduma gads</label>
-                <input type="number" id="gads" min="1990" max="2100" required>
+                <input type="number" id="gads" min="1990" max="<?= date('Y') + 1 ?>" step="1" required>
 
                 <label for="krasa">Krāsa</label>
-                <input type="text" id="krasa" maxlength="30">
+                <input type="text" id="krasa" data-ievade="krasa" minlength="2" maxlength="30" pattern="\p{L}[\p{L} \-]*" title="Tikai burti, atstarpes un defise">
 
                 <label for="vietu_skaits">Vietu skaits</label>
-                <input type="number" id="vietu_skaits" min="1" max="99" value="4" required>
+                <input type="number" id="vietu_skaits" min="2" max="9" step="1" value="4" required>
 
                 <label for="foto">Foto (JPG, PNG, WEBP līdz 3 MB)</label>
                 <img id="fotoPreview" alt="" style="display:none; max-width:100%; max-height:160px; border-radius:8px; margin-bottom:8px;">

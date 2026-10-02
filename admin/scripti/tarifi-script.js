@@ -2,8 +2,9 @@ let edit = false;
 
 const API = 'api/tarifi-api.php'
 
-document.querySelector('#new-btn').addEventListener('click', (e) => {
+document.querySelector('#new-btn').addEventListener('click', async (e) => {
     e.preventDefault()
+    await loadAutos()
     showModal()
 })
 document.querySelector('.close-modal').addEventListener('click', hideModal)
@@ -41,6 +42,25 @@ function hideModal(){
     edit = false
 }
 
+// Aizpilda automašīnu izvēlni no autoparka
+async function loadAutos(){
+    try{
+        const response = await fetch(`${API}?auto_saraksts=1`)
+        const autos = await response.json()
+
+        if (!response.ok) throw new Error(autos.error || 'Kļūda')
+
+        let options = '<option value="">— izvēlies automašīnu —</option>'
+        autos.forEach(a => {
+            options += `<option value="${a.auto_id}">${esc(a.marka)} ${esc(a.modelis)} (${a.vietu_skaits} vietas)</option>`
+        })
+        document.querySelector('#auto_id').innerHTML = options
+    }catch(err){
+        alert("Neizdevās ielādēt automašīnu sarakstu!")
+        console.error(err)
+    }
+}
+
 async function fetchTarifi(){
     try{
         const response = await fetch(API)
@@ -50,12 +70,17 @@ async function fetchTarifi(){
 
         let template = ""
         tarifi.forEach(t => {
+            const auto = t.marka
+                ? `${esc(t.marka)} ${esc(t.modelis)}`
+                : (esc(t.automasina) || '—')
+
             template += `
                 <tr data-id="${t.tarifs_id}">
                     <td>${t.tarifs_id}</td>
                     <td>${esc(t.kods)}</td>
                     <td>${esc(t.nosaukums)}</td>
-                    <td>${esc(t.automasina)}</td>
+                    <td>${auto}</td>
+                    <td>${t.vietu_skaits}</td>
                     <td>${t.cena_km}</td>
                     <td>${t.cena_min}</td>
                     <td>${esc(t.birka)}</td>
@@ -94,6 +119,8 @@ async function handleTableClick(e){
 
 async function editTarifs(id){
     try{
+        await loadAutos()
+
         const response = await fetch(`${API}?id=${id}`)
         const t = await response.json()
 
@@ -101,8 +128,7 @@ async function editTarifs(id){
 
         document.querySelector('#kods').value = t.kods
         document.querySelector('#nosaukums').value = t.nosaukums
-        document.querySelector('#automasina').value = t.automasina
-        document.querySelector('#vietu_skaits').value = t.vietu_skaits
+        document.querySelector('#auto_id').value = t.auto_id ?? ''
         document.querySelector('#iekrausanas_maksa').value = t.iekrausanas_maksa
         document.querySelector('#cena_km').value = t.cena_km
         document.querySelector('#cena_min').value = t.cena_min
@@ -123,8 +149,7 @@ async function handleFormSubmit(e){
     const formData = {
         kods: document.querySelector('#kods').value,
         nosaukums: document.querySelector('#nosaukums').value,
-        automasina: document.querySelector('#automasina').value,
-        vietu_skaits: document.querySelector('#vietu_skaits').value,
+        auto_id: document.querySelector('#auto_id').value,
         iekrausanas_maksa: document.querySelector('#iekrausanas_maksa').value,
         cena_km: document.querySelector('#cena_km').value,
         cena_min: document.querySelector('#cena_min').value,
@@ -142,11 +167,8 @@ async function handleFormSubmit(e){
             body: JSON.stringify(formData)
         })
 
-        if (!response.ok) {
-            const data = await response.json()
-            alert(data.error || "Neizdevās saglabāt tarifu!")
-            return
-        }
+        // Kļūdas gadījumā paziņojumu parāda pazinojumi.js, forma paliek atvērta
+        if (!response.ok) return
 
         hideModal()
         await fetchTarifi()
@@ -174,12 +196,7 @@ async function deleteTarifsModal(id){
 
 async function deleteTarifs(id){
     try{
-        const response = await fetch(`${API}?id=${id}`, {method: 'DELETE'})
-
-        if (!response.ok) {
-            const data = await response.json()
-            alert(data.error || "Neizdevās dzēst tarifu!")
-        }
+        await fetch(`${API}?id=${id}`, {method: 'DELETE'})
     }catch(err){
         alert("Neizdevās dzēst tarifu! Mēģiniet vēlreiz!")
         console.error(err)

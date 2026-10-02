@@ -26,25 +26,20 @@ function kluda($kods, $teksts) {
 
 // Palīgfunkcija datu validācijai:
 function validet_laukus($pieteikums) {
-    foreach (['vards', 'talrunis'] as $lauks) {
-        if (!isset($pieteikums[$lauks]) || trim((string)$pieteikums[$lauks]) === '') {
-            kluda(400, "Lauks '$lauks' ir obligāts un nevar būt tukšs");
-        }
+    $vards = preg_replace('/\s+/u', ' ', trim((string) ($pieteikums['vards'] ?? '')));
+    if ($vards === '') kluda(400, "Lauks 'vards' ir obligāts un nevar būt tukšs");
+    if (mb_strlen($vards) < 2 || mb_strlen($vards) > 100 || !preg_match('/^\p{L}[\p{L} \'\-]*$/u', $vards)) {
+        kluda(400, "Vārds: tikai burti, atstarpes, defise un apostrofs (2–100 simboli)");
     }
 
-    $limiti = ['vards' => 100, 'talrunis' => 20, 'epasts' => 100];
-    foreach ($limiti as $lauks => $max) {
-        if (isset($pieteikums[$lauks]) && mb_strlen(trim($pieteikums[$lauks])) > $max) {
-            kluda(400, "Lauks '$lauks' nedrīkst būt garāks par $max simboliem");
-        }
+    $talrunis = trim((string) ($pieteikums['talrunis'] ?? ''));
+    if ($talrunis === '') kluda(400, "Lauks 'talrunis' ir obligāts un nevar būt tukšs");
+    if (!preg_match('/^[0-9]{8}$/', $talrunis)) {
+        kluda(400, "Tālruņa numuram jāsastāv tieši no 8 cipariem (bez +371)");
     }
 
-    if (!preg_match('/^\+?[0-9 ]{8,20}$/', trim($pieteikums['talrunis']))) {
-        kluda(400, "Nederīgs tālruņa numura formāts");
-    }
-
-    $epasts = trim($pieteikums['epasts'] ?? '');
-    if ($epasts !== '' && !filter_var($epasts, FILTER_VALIDATE_EMAIL)) {
+    $epasts = trim((string) ($pieteikums['epasts'] ?? ''));
+    if ($epasts !== '' && (mb_strlen($epasts) > 100 || !filter_var($epasts, FILTER_VALIDATE_EMAIL))) {
         kluda(400, "Nederīgs e-pasta formāts");
     }
 }

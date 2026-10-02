@@ -46,16 +46,16 @@ require "header.php";
         <form id="pieteikumuForma">
             <div class="form-elements">
                 <label for="vards">Vārds</label>
-                <input type="text" id="vards" maxlength="50" required>
+                <input type="text" id="vards" data-ievade="vards" minlength="2" maxlength="50" pattern="\p{L}[\p{L} '\-]*" title="Tikai burti, atstarpes, defise un apostrofs" required>
 
                 <label for="uzvards">Uzvārds</label>
-                <input type="text" id="uzvards" maxlength="50" required>
+                <input type="text" id="uzvards" data-ievade="vards" minlength="2" maxlength="50" pattern="\p{L}[\p{L} '\-]*" title="Tikai burti, atstarpes, defise un apostrofs" required>
 
-                <label for="talrunis">Tālrunis</label>
-                <input type="tel" id="talrunis" maxlength="20" placeholder="+37120000000" required>
+                <label for="talrunis">Tālrunis (8 cipari)</label>
+                <input type="tel" id="talrunis" data-ievade="cipari" inputmode="numeric" minlength="8" maxlength="8" pattern="[0-9]{8}" placeholder="20000000" title="8 cipari, bez +371" required>
 
                 <label for="licences_nr">Vadītāja apliecības nr.</label>
-                <input type="text" id="licences_nr" maxlength="20" required>
+                <input type="text" id="licences_nr" data-ievade="licence" minlength="9" maxlength="9" pattern="[A-Z]{2}[0-9]{7}" placeholder="LV1234567" title="2 burti un 7 cipari" required>
 
                 <label for="auto_id">Automašīna</label>
                 <select id="auto_id">

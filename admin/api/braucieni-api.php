@@ -48,21 +48,37 @@ function sagatavot_datus($d) {
     global $savienojums;
 
     foreach (['klients_id', 'tarifs_id', 'no_adrese', 'uz_adrese'] as $lauks) {
-        if (!isset($d[$lauks]) || trim((string)$d[$lauks]) === '') {
+        if (!isset($d[$lauks]) || trim((string) $d[$lauks]) === '') {
             kluda(400, "Lauks '$lauks' ir obligāts un nevar būt tukšs");
         }
     }
-
-    foreach (['no_adrese', 'uz_adrese'] as $lauks) {
-        if (mb_strlen(trim($d[$lauks])) > 150) {
-            kluda(400, "Lauks '$lauks' nedrīkst būt garāks par 150 simboliem");
+    foreach (['klients_id', 'tarifs_id'] as $lauks) {
+        if (filter_var($d[$lauks], FILTER_VALIDATE_INT, ["options" => ["min_range" => 1]]) === false) {
+            kluda(400, "Nederīga vērtība laukā '$lauks'");
         }
+    }
+
+    $adreses = [];
+    foreach (['no_adrese', 'uz_adrese'] as $lauks) {
+        $v = preg_replace('/\s+/u', ' ', trim((string) $d[$lauks]));
+        if (mb_strlen($v) < 3 || mb_strlen($v) > 150 || !preg_match('/^[\p{L}\p{N}][\p{L}\p{N} .,()\/\-]*$/u', $v)) {
+            kluda(400, "Adrese: tikai burti, cipari, atstarpes un simboli . , ( ) / - (3–150 simboli)");
+        }
+        $adreses[$lauks] = $v;
+    }
+    if (mb_strtolower($adreses['no_adrese']) === mb_strtolower($adreses['uz_adrese'])) {
+        kluda(400, "Sākuma un galamērķa adrese nedrīkst būt vienādas");
     }
 
     $klients_id = (int) $d['klients_id'];
     $tarifs_id = (int) $d['tarifs_id'];
     $sofers_id = neobligats($d['sofers_id'] ?? null);
-    $sofers_id = $sofers_id === null ? null : (int) $sofers_id;
+    if ($sofers_id !== null) {
+        if (filter_var($sofers_id, FILTER_VALIDATE_INT, ["options" => ["min_range" => 1]]) === false) {
+            kluda(400, "Nederīga vērtība laukā 'sofers_id'");
+        }
+        $sofers_id = (int) $sofers_id;
+    }
 
     parbaudit_id('klienti', 'klients_id', $klients_id, "Klients nav atrasts");
     parbaudit_id('tarifi', 'tarifs_id', $tarifs_id, "Tarifs nav atrasts");
@@ -83,16 +99,15 @@ function sagatavot_datus($d) {
 
     $cena = null;
     if ($km !== null) {
-        if (!is_numeric($km) || $km < 0 || $km > 9999.99) {
-            kluda(400, "Kilometriem jābūt skaitlim no 0 līdz 9999.99");
+        if (!preg_match('/^[0-9]+(\.[0-9]{1,2})?$/', trim((string) $km)) || $km > 1000) {
+            kluda(400, "Kilometriem jābūt skaitlim no 0 līdz 1000 (līdz 2 cipariem aiz komata)");
         }
-        if (filter_var($minutes, FILTER_VALIDATE_INT, ["options" => ["min_range" => 0, "max_range" => 9999]]) === false) {
-            kluda(400, "Minūtēm jābūt veselam skaitlim no 0 līdz 9999");
+        if (filter_var($minutes, FILTER_VALIDATE_INT, ["options" => ["min_range" => 0, "max_range" => 1440]]) === false) {
+            kluda(400, "Minūtēm jābūt veselam skaitlim no 0 līdz 1440");
         }
         $km = (float) $km;
         $minutes = (int) $minutes;
 
-        // Cena = iekāpšanas maksa + km * cena_km + min * cena_min
         $sql = $savienojums->prepare("SELECT iekrausanas_maksa, cena_km, cena_min FROM tarifi WHERE tarifs_id = ?");
         $sql->bind_param("i", $tarifs_id);
         $sql->execute();
@@ -107,8 +122,8 @@ function sagatavot_datus($d) {
         'klients_id' => $klients_id,
         'sofers_id'  => $sofers_id,
         'tarifs_id'  => $tarifs_id,
-        'no_adrese'  => trim($d['no_adrese']),
-        'uz_adrese'  => trim($d['uz_adrese']),
+        'no_adrese'  => $adreses['no_adrese'],
+        'uz_adrese'  => $adreses['uz_adrese'],
         'km'         => $km,
         'minutes'    => $minutes,
         'cena'       => $cena,
