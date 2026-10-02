@@ -1,8 +1,8 @@
 <?php
     $serveris = "localhost";
-    $lietotajs = "root";
-    $parole = "";
-    $datubaze = "liepajas_taksometrs";
+    $lietotajs = "grobina1_cecotkins";
+    $parole = "Kgzc2Z9468@";
+    $datubaze = "grobina1_cecotkins";
 
     $savienojums = mysqli_connect($serveris, $lietotajs, $parole, $datubaze);
 

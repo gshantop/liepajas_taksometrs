@@ -207,22 +207,22 @@ CREATE TABLE `autoparks` (
   UNIQUE KEY `uq_autoparks_numurs` (`numurs`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
-INSERT INTO `autoparks` (`numurs`, `marka`, `modelis`, `gads`, `krasa`, `vietu_skaits`) VALUES
-('AB1234', 'Toyota',        'Prius',     2020, 'Balta',   4),
-('CD5678', 'Skoda',         'Octavia',   2019, 'Melna',   4),
-('EF9012', 'Volkswagen',    'Passat',    2021, 'Pelēka',  4),
-('GH3456', 'Tesla',         'Model 3',   2022, 'Balta',   4),
-('JK7890', 'Toyota',        'Corolla',   2018, 'Sudraba', 4),
-('LM2345', 'Mercedes-Benz', 'E-Class',   2021, 'Melna',   4),
-('NP6789', 'Ford',          'Tourneo',   2020, 'Zila',    7),
-('RS0123', 'Mercedes-Benz', 'V-Class',   2022, 'Melna',   7),
-('TU4567', 'Volkswagen',    'Caravelle', 2019, 'Balta',   8),
-('VW8901', 'Hyundai',       'Ioniq',     2021, 'Zaļa',    4),
-('MN2468', 'Skoda',         'Superb',    2021, 'Melna',   4),
-('PR1357', 'Volkswagen',    'Polo',      2020, 'Sarkana', 4),
-('ST9753', 'Toyota',        'Camry',     2022, 'Pelēka',  4),
-('UV8642', 'Tesla',         'Model Y',   2023, 'Balta',   4),
-('KL3579', 'Mercedes-Benz', 'Vito',      2020, 'Melna',   8);
+INSERT INTO `autoparks` (`numurs`, `marka`, `modelis`, `gads`, `krasa`, `vietu_skaits`, `foto`) VALUES
+('AB1234', 'Toyota',        'Prius',     2020, 'Balta',   4, '736de1488a2f7bd1.jpg'),
+('CD5678', 'Skoda',         'Octavia',   2019, 'Melna',   4, '887e77b8a7e492ae.jpg'),
+('EF9012', 'Volkswagen',    'Passat',    2021, 'Pelēka',  4, 'f3ef532bd5b8e8d6.webp'),
+('GH3456', 'Tesla',         'Model 3',   2022, 'Balta',   4, 'c4f781ff2d716e79.jpg'),
+('JK7890', 'Toyota',        'Corolla',   2018, 'Sudraba', 4, 'bcd001f0ccf06c27.webp'),
+('LM2345', 'Mercedes-Benz', 'E-Class',   2021, 'Melna',   4, '84694d26e0c18717.jpg'),
+('NP6789', 'Ford',          'Tourneo',   2020, 'Zila',    7, 'ee031633f6925468.jpg'),
+('RS0123', 'Mercedes-Benz', 'V-Class',   2022, 'Melna',   7, 'edc02658dd32e18e.jpg'),
+('TU4567', 'Volkswagen',    'Caravelle', 2019, 'Balta',   8, '1ccd78c0b9833196.jpg'),
+('VW8901', 'Hyundai',       'Ioniq',     2021, 'Zaļa',    4, '2454b30bd4d79ae6.jpg'),
+('MN2468', 'Skoda',         'Superb',    2021, 'Melna',   4, 'e01c354372f13ff5.jpg'),
+('PR1357', 'Volkswagen',    'Polo',      2020, 'Sarkana', 4, '729ac9d672153f50.jpg'),
+('ST9753', 'Toyota',        'Camry',     2022, 'Pelēka',  4, 'ec416cbe582e7c3c.jpg'),
+('UV8642', 'Tesla',         'Model Y',   2023, 'Balta',   4, '56b88fc59715ca46.jpg'),
+('KL3579', 'Mercedes-Benz', 'Vito',      2020, 'Melna',   8, 'f67be6aa791fc0c7.jpg');
 
 
 CREATE TABLE `tarifi` (
