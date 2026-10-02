@@ -16,7 +16,7 @@ $page = basename($_SERVER["PHP_SELF"]);
     <title>Taksometru pārvaldības sistēma</title>
 
     <!-- style.css atrodas saknes mapē, nevis admin mapē -->
-    <link rel="stylesheet" href="../style.css?v=3">
+    <link rel="stylesheet" href="../style.css?v=4">
 
     <!-- Fonti, kurus izmanto style.css -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -30,7 +30,12 @@ $page = basename($_SERVER["PHP_SELF"]);
             <i class="fa-solid fa-taxi"></i> Taksometru pārvaldība
         </a>
 
-        <nav>
+        <!-- Hamburgera poga (redzama tikai šaurā ekrānā) -->
+        <button type="button" class="icon-btn" id="burger" aria-label="Izvēlne" aria-expanded="false" aria-controls="admin-nav">
+            <i class="fa-solid fa-bars"></i>
+        </button>
+
+        <nav id="admin-nav">
             <a href="main.php" class="btn <?= $page == 'main.php' ? 'active' : '' ?>">Kopsavilkums</a>
             <a href="autoparks.php" class="btn <?= $page == 'autoparks.php' ? 'active' : '' ?>">Auto parks</a>
             <a href="soferi.php" class="btn <?= $page == 'soferi.php' ? 'active' : '' ?>">Šoferi</a>
@@ -39,7 +44,21 @@ $page = basename($_SERVER["PHP_SELF"]);
             <a href="tarifi.php" class="btn <?= $page == 'tarifi.php' ? 'active' : '' ?>">Tarifi</a>
             <a href="lietotaji.php" class="btn <?= $page == 'lietotaji.php' ? 'active' : '' ?>">Lietotāji</a>
             <a href="#" class="btn"><i class="fa-solid fa-user"></i> <?= htmlspecialchars($_SESSION["lietotajvards_GSHT"]) ?></a>
-            <a href="logout.php" class="btn" aria-label="Iziet"><i class="fas fa-power-off"></i></a>
+            <a href="logout.php" class="btn" aria-label="Iziet"><i class="fas fa-power-off"></i><span class="mob-only"> Iziet</span></a>
         </nav>
     </header>
+
+    <script>
+        (function () {
+            const burger = document.querySelector('#burger')
+            const nav = document.querySelector('#admin-nav')
+
+            burger.addEventListener('click', () => {
+                const open = nav.classList.toggle('open')
+                burger.setAttribute('aria-expanded', open)
+                burger.querySelector('i').className = open ? 'fa-solid fa-xmark' : 'fa-solid fa-bars'
+            })
+        })()
+    </script>
+
     <main>

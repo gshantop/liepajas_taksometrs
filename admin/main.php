@@ -63,8 +63,6 @@ $kartes = [
     'Tarifi'          => $skaiti['tarifi'],
     'Braucieni kopā'  => $braucieni['kopa'],
     'Ieņēmumi'        => euro($braucieni['ienakumi']),
-    'Vidējā cena'     => euro($braucieni['videja_cena']),
-    'Nobraukti km'    => number_format((float) $braucieni['km'], 1, '.', '')
 ];
 ?>
 
