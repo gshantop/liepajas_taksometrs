@@ -1092,6 +1092,54 @@ footer.site {
     font-size: .9rem;
 }
 
+/* ---------- Autoparks ---------- */
+.fleet-card {
+    padding: 0;
+    overflow: hidden;
+}
+
+.fleet-img {
+    height: 150px;
+    display: grid;
+    place-items: center;
+    background: var(--road);
+    color: var(--accent);
+    font-size: 3rem;
+    background-size: cover;
+    background-position: center;
+}
+
+.fleet-body {
+    padding: 20px 22px 22px;
+}
+
+.fleet-body h3 {
+    margin-bottom: 4px;
+}
+
+.fleet-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 14px;
+    margin-top: 12px;
+    color: var(--muted);
+    font-size: .9rem;
+}
+
+.fleet-meta i {
+    color: var(--accent);
+    margin-right: 5px;
+}
+
+.fleet-state {
+    color: var(--muted);
+}
+
+.fleet-state.err {
+    color: var(--danger);
+    font-weight: 600;
+}
+
 /* ---------- Adaptīvais dizains ---------- */
 @media (max-width: 860px) {
     section {

@@ -39,18 +39,6 @@ document.getElementById('filter').addEventListener('click', e => {
   filter = b.dataset.v; renderFilter(); renderTariffs();
 });
 
-/* ---------- Kalkulators ---------- */
-const cls = document.getElementById('cls'), km = document.getElementById('km'), wait = document.getElementById('wait');
-cls.innerHTML = TARIFFS.map(t => `<option value="${t.id}">${t.name}</option>`).join('');
-function calc() {
-  const t = TARIFFS.find(x => x.id === cls.value);
-  const d = +km.value, w = Math.max(0, +wait.value || 0);
-  document.getElementById('kmv').textContent = d;
-  document.getElementById('sum').textContent = fmt(t.board + d * t.km + w * t.wait);
-  document.getElementById('calcInfo').textContent = `${t.name}: ${fmt(t.board)} + ${d} km × ${fmt(t.km)}` + (w ? ` + ${w} min gaidīšana` : '');
-}
-[cls, km, wait].forEach(el => el.addEventListener('input', calc));
-
 /* ---------- Atsauksmes ---------- */
 document.getElementById('reviews').innerHTML = REVIEWS.map(r => `
   <blockquote class="card">
@@ -92,4 +80,4 @@ document.getElementById('form').addEventListener('submit', e => {
 });
 
 document.getElementById('year').textContent = new Date().getFullYear();
-renderFilter(); renderTariffs(); calc();
+renderFilter(); renderTariffs();

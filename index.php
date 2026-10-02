@@ -1,3 +1,6 @@
+<?php
+require "database/db_config.php";
+?>
 <!DOCTYPE html>
 <html lang="lv" data-theme="light">
 <head>
@@ -28,7 +31,7 @@
       <ul id="menu">
         <li><a class="link" href="#pakalpojumi">Pakalpojumi</a></li>
         <li><a class="link" href="#tarifi">Tarifi</a></li>
-        <li><a class="link" href="#kalkulators">Cenas aprēķins</a></li>
+        <li><a class="link" href="#autoparks">Autoparks</a></li>
         <li><a class="link" href="#atsauksmes">Atsauksmes</a></li>
         <li><a class="link" href="#kontakti">Kontakti</a></li>
         <li><button class="icon-btn" id="theme" type="button" aria-label="Mainīt krāsu režīmu" title="Gaišais / tumšais režīms"><i class="fa-solid fa-moon"></i></button></li>
@@ -44,7 +47,7 @@
       <div>
         <h1>Brauciens bez gaidīšanas.</h1>
         <p>Taksometrs Liepājā un apkārtnē — visu diennakti. Fiksēta cena, pārbaudīti autovadītāji, tīri auto.</p>
-        <a class="btn" href="#kalkulators">Aprēķināt cenu</a>
+        <a class="btn" href="#autoparks">Skatīt autoparku</a>
         <a class="btn ghost" href="#tarifi">Skatīt tarifus</a>
       </div>
       <div class="phone-card">
@@ -77,24 +80,42 @@
     </div>
   </section>
 
-  <section id="kalkulators">
+  <section id="autoparks">
     <div class="wrap">
-      <h2>Cenas aprēķins</h2>
-      <p class="lead">Ievadi attālumu un izvēlies auto klasi — redzēsi aptuvenu brauciena cenu.</p>
-      <div class="calc">
-        <div class="card">
-          <label for="cls">Auto klase</label>
-          <select id="cls"></select>
-          <label for="km">Attālums: <span id="kmv">10</span> km</label>
-          <input id="km" type="range" min="1" max="200" value="10">
-          <label for="wait">Gaidīšana (min)</label>
-          <input id="wait" type="number" min="0" max="120" value="0">
-        </div>
-        <div class="card result">
-          <p>Aptuvenā cena</p>
-          <div class="sum" id="sum">—</div>
-          <p id="calcInfo"></p>
-        </div>
+      <h2>Autoparks</h2>
+      <p class="lead">Mūsu auto — tīri, apkopti un gatavi braucienam jebkurā diennakts laikā.</p>
+      <div class="grid g3" id="fleet">
+        <?php
+          // Aktīvās automašīnas; klasi ņemam no tarifi, ja auto ir piesaistīts tarifam
+          $query = "SELECT a.marka, a.modelis, a.gads, a.vietu_skaits, a.foto, t.nosaukums AS klase
+                    FROM autoparks a
+                    LEFT JOIN tarifi t ON t.auto_id = a.auto_id AND t.statuss = 'aktīvs'
+                    WHERE a.statuss = 'aktīvs'
+                    ORDER BY a.marka, a.modelis";
+          $result = mysqli_query($savienojums, $query);
+
+          if ($result && mysqli_num_rows($result) > 0) {
+            while ($row = mysqli_fetch_assoc($result)) {
+        ?>
+        <article class="card fleet-card">
+          <div class="fleet-img"<?php if ($row['foto']) { ?> style="background-image:url('admin/uploads/autoparks/<?php echo rawurlencode($row['foto']); ?>')"<?php } ?>>
+            <?php if (!$row['foto']) { ?><i class="fa-solid fa-car-side"></i><?php } ?>
+          </div>
+          <div class="fleet-body">
+            <?php if ($row['klase']) { ?><span class="tag"><?php echo htmlspecialchars($row['klase']); ?></span><?php } ?>
+            <h3><?php echo htmlspecialchars($row['marka'] . ' ' . $row['modelis']); ?></h3>
+            <div class="fleet-meta">
+              <span><i class="fa-regular fa-calendar"></i><?php echo (int) $row['gads']; ?></span>
+              <span><i class="fa-solid fa-users"></i><?php echo (int) $row['vietu_skaits']; ?> vietas</span>
+            </div>
+          </div>
+        </article>
+        <?php
+            }
+          } else {
+        ?>
+        <p class="fleet-state">Autoparks pašlaik ir tukšs.</p>
+        <?php } ?>
       </div>
     </div>
   </section>
