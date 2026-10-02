@@ -94,7 +94,7 @@ $kartes = [
                     $augstums = $max_ienakumi > 0 ? round($d['ienakumi'] / $max_ienakumi * 150) : 0;
                 ?>
                     <div class="ks-bar-wrap">
-                        <div class="ks-bar-val"><?= round($d['ienakumi']) ?> €</div>
+                        <div class="ks-bar-val"><?= euro($d['ienakumi']) ?></div>
                         <div class="ks-bar" style="height:<?= $augstums ?>px"></div>
                         <div class="ks-bar-lbl"><?= date('d.m', strtotime($d['diena'])) ?></div>
                     </div>
