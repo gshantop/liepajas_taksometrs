@@ -13,6 +13,7 @@ function fail($msg) {
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') fail('Nepareiza pieprasījuma metode');
 
 $vards  = trim($_POST['vards'] ?? '');
+$epasts = trim($_POST['epasts'] ?? '');
 $no     = trim($_POST['no'] ?? '');
 $uz     = trim($_POST['uz'] ?? '');
 $tarifs = (int) ($_POST['tarifs'] ?? 0);
@@ -27,6 +28,9 @@ if (strlen($talr) === 11 && substr($talr, 0, 3) === '371') {
 
 if ($vards === '' || $no === '' || $uz === '') fail('Aizpildi visus laukus');
 if (!preg_match('/^\d{8}$/', $talr)) fail('Nepareizs tālruņa numurs (8 cipari)');
+if ($epasts === '' || strlen($epasts) > 100 || !filter_var($epasts, FILTER_VALIDATE_EMAIL)) {
+    fail('Nepareizs e-pasta formāts');
+}
 if ($km < 0.5 || $km > 500) fail('Nepareizs attālums');
 
 // Tarifs no DB (cenu rēķinām serverī, nevis ņemam no formas)
@@ -41,21 +45,22 @@ if (!$t) fail('Tarifs nav atrasts');
 $summa = round($t['iekrausanas_maksa'] + $t['cena_km'] * $km, 2);
 
 // Klients: atrodam pēc tālruņa vai izveidojam
-$st = $savienojums->prepare("SELECT klients_id, statuss FROM klienti WHERE talrunis = ? LIMIT 1");
+$st = $savienojums->prepare("SELECT klients_id FROM klienti WHERE talrunis = ? LIMIT 1");
 $st->bind_param("s", $talr);
 $st->execute();
 $k = $st->get_result()->fetch_assoc();
 
 if ($k) {
+    // Esošam klientam atjaunojam vārdu, e-pastu un statusu (arī dzēstam)
     $klients = (int) $k['klients_id'];
-    if ($k['statuss'] !== 'aktīvs') {
-        $st = $savienojums->prepare("UPDATE klienti SET statuss = 'aktīvs', vards = ? WHERE klients_id = ?");
-        $st->bind_param("si", $vards, $klients);
-        $st->execute();
-    }
+    $st = $savienojums->prepare(
+        "UPDATE klienti SET statuss = 'aktīvs', vards = ?, epasts = ? WHERE klients_id = ?"
+    );
+    $st->bind_param("ssi", $vards, $epasts, $klients);
+    if (!$st->execute()) fail('Neizdevās atjaunot klientu');
 } else {
-    $st = $savienojums->prepare("INSERT INTO klienti (vards, talrunis) VALUES (?, ?)");
-    $st->bind_param("ss", $vards, $talr);
+    $st = $savienojums->prepare("INSERT INTO klienti (vards, talrunis, epasts) VALUES (?, ?, ?)");
+    $st->bind_param("sss", $vards, $talr, $epasts);
     if (!$st->execute()) fail('Neizdevās saglabāt klientu');
     $klients = $savienojums->insert_id;
 }
@@ -82,6 +87,7 @@ try {
     $checkout_session = \Stripe\Checkout\Session::create([
         "mode" => "payment",
         "locale" => "lv",
+        "customer_email" => $epasts,
         "client_reference_id" => (string) $id,
         "success_url" => BASE_URL . "/payment/success.php?session_id={CHECKOUT_SESSION_ID}",
         "cancel_url"  => BASE_URL . "/",

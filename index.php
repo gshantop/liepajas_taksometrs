@@ -224,6 +224,8 @@ require "database/db_config.php";
         <input id="name" name="vards" required autocomplete="name">
         <label for="tel">Tālrunis</label>
         <input id="tel" name="talrunis" type="tel" required autocomplete="tel" placeholder="20000000">
+        <label for="o-epasts">E-pasts</label>
+        <input id="o-epasts" name="epasts" type="email" required autocomplete="email" placeholder="vards@example.com">
         <label for="o-no">No adreses</label>
         <input id="o-no" name="no" required>
         <label for="o-uz">Uz adresi</label>
