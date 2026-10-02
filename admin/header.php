@@ -16,13 +16,12 @@ $page = basename($_SERVER["PHP_SELF"]);
     <title>Taksometru pārvaldības sistēma</title>
 
     <!-- style.css atrodas saknes mapē, nevis admin mapē -->
-    <link rel="stylesheet" href="../style.css?v=2">
+    <link rel="stylesheet" href="../style.css?v=3">
 
     <!-- Fonti, kurus izmanto style.css -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;600;700;800&family=Archivo+Narrow:wght@700&display=swap">
-
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 </head>
 <body>

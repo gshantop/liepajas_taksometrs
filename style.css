@@ -880,6 +880,103 @@ textarea:focus {
     margin-top: 10px;
 }
 
+/* ---------- Kopsavilkums ---------- */
+.ks-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+    gap: 16px;
+    margin-bottom: 24px;
+}
+
+.ks-stat {
+    padding: 18px 20px;
+}
+
+.ks-label {
+    font-size: .85rem;
+    color: var(--muted);
+    margin-bottom: 6px;
+}
+
+.ks-value {
+    font: 700 1.9rem 'Archivo Narrow', sans-serif;
+}
+
+.ks-two {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(320px, 100%), 1fr));
+    gap: 16px;
+    margin-bottom: 24px;
+}
+
+.ks-panel {
+    padding: 20px;
+}
+
+.ks-panel:hover {
+    transform: none;
+    border-color: var(--line);
+}
+
+.ks-panel h3 {
+    margin: 0 0 14px;
+}
+
+.ks-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--line);
+}
+
+.ks-row:last-child {
+    border-bottom: 0;
+}
+
+.ks-chart {
+    display: flex;
+    align-items: flex-end;
+    gap: 12px;
+    height: 200px;
+    padding-top: 10px;
+}
+
+.ks-bar-wrap {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-end;
+    height: 100%;
+    min-width: 0;
+}
+
+.ks-bar {
+    width: 100%;
+    max-width: 56px;
+    min-height: 3px;
+    background: var(--accent);
+    border-radius: 6px 6px 0 0;
+}
+
+.ks-bar-val {
+    font-size: .75rem;
+    font-weight: 700;
+    margin-bottom: 4px;
+}
+
+.ks-bar-lbl {
+    font-size: .75rem;
+    color: var(--muted);
+    margin-top: 6px;
+}
+
+.ks-empty {
+    color: var(--muted);
+    padding: 8px 0;
+}
+
 /* ---------- Kājene ---------- */
 footer {
     background: var(--surface);
