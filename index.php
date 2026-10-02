@@ -1,5 +1,5 @@
 <?php
-// Pieslēgums datu bāzei
+session_start();
 require "database/db_config.php";
 ?>
 <!DOCTYPE html>
@@ -33,6 +33,7 @@ require "database/db_config.php";
         <li><a class="link" href="#pakalpojumi">Pakalpojumi</a></li>
         <li><a class="link" href="#tarifi">Tarifi</a></li>
         <li><a class="link" href="#autoparks">Autoparks</a></li>
+        <li><a class="link" href="#" data-order>Pasūtīt</a></li>
         <li><a class="link" href="#atsauksmes">Atsauksmes</a></li>
         <li><a class="link" href="#kontakti">Kontakti</a></li>
         <li><button class="icon-btn" id="theme" type="button" aria-label="Mainīt krāsu režīmu" title="Gaišais / tumšais režīms"><i class="fa-solid fa-moon"></i></button></li>
@@ -43,12 +44,29 @@ require "database/db_config.php";
 </header>
 
 <main id="top">
+  <?php
+    // Paziņojums pēc pasūtījuma / maksājuma
+    $msgs = [
+      'order_success'   => ['Pasūtījums pieņemts! Maksāsi braucienā skaidrā naudā.', 'ok'],
+      'payment_success' => ['Maksājums saņemts, paldies! Pasūtījums pieņemts.', 'ok'],
+      'payment-error'   => ['Maksājums netika apstiprināts. Mēģini vēlreiz.', 'err'],
+      'payment-empty'   => ['Neizdevās pārbaudīt maksājumu.', 'err'],
+    ];
+    if (!empty($_SESSION['pazinojums']) && isset($msgs[$_SESSION['pazinojums']])) {
+      [$text, $type] = $msgs[$_SESSION['pazinojums']];
+      $color = $type === 'ok' ? '#16a34a' : '#dc2626';
+      echo '<div class="wrap"><p role="status" style="margin:16px 0;padding:14px 18px;border-radius:8px;color:#fff;background:' . $color . '">'
+         . htmlspecialchars($text) . '</p></div>';
+    }
+    unset($_SESSION['pazinojums']);
+  ?>
+
   <div class="hero">
     <div class="wrap">
       <div>
         <h1>Brauciens bez gaidīšanas.</h1>
         <p>Taksometrs Liepājā un apkārtnē — visu diennakti. Fiksēta cena, pārbaudīti autovadītāji, tīri auto.</p>
-        <a class="btn" href="#autoparks">Skatīt autoparku</a>
+        <a class="btn" href="#" data-order>Pasūtīt taksometru</a>
         <a class="btn ghost" href="#tarifi">Skatīt tarifus</a>
       </div>
       <div class="phone-card">
@@ -84,7 +102,7 @@ require "database/db_config.php";
       <div class="grid g3" id="tariffs">
         <?php
           // Aktīvie tarifi no datu bāzes
-          $query = "SELECT nosaukums, automasina, vietu_skaits, iekrausanas_maksa, cena_km, cena_min, birka
+          $query = "SELECT tarifs_id, nosaukums, automasina, vietu_skaits, iekrausanas_maksa, cena_km, cena_min, birka
                     FROM tarifi
                     WHERE statuss = 'aktīvs'
                     ORDER BY tarifs_id";
@@ -103,6 +121,7 @@ require "database/db_config.php";
             <li>Gaidīšana: <?php echo number_format($row['cena_min'], 2, ',', ''); ?> € / min</li>
             <li>Vietu skaits: <?php echo (int) $row['vietu_skaits']; ?></li>
           </ul>
+          <button type="button" class="btn" style="margin-top:16px;width:100%" data-order data-tarifs="<?php echo (int) $row['tarifs_id']; ?>">Pasūtīt</button>
         </article>
         <?php
             }
@@ -154,7 +173,7 @@ require "database/db_config.php";
     </div>
   </section>
 
-  <section id="atsauksmes" style="background: var(--surface)">
+  <section id="atsauksmes">
     <div class="wrap">
       <h2>Klientu atsauksmes</h2>
       <p class="lead">Ko saka tie, kas jau braukuši.</p>
@@ -178,32 +197,62 @@ require "database/db_config.php";
     </div>
   </section>
 
-  <section id="kontakti">
+  <section id="kontakti" style="background: var(--surface)">
     <div class="wrap">
       <h2>Kontakti</h2>
-      <div class="contact">
+      <div class="contact" style="grid-template-columns:1fr">
         <dl class="card">
           <dt>Tālrunis</dt><dd>+371 2000 0000</dd>
           <dt>E-pasts</dt><dd>info@liepajastaksometrs.lv</dd>
           <dt>Adrese</dt><dd>Graudu iela 1, Liepāja, LV-3401</dd>
           <dt>Darba laiks</dt><dd>24 stundas diennaktī, 7 dienas nedēļā</dd>
         </dl>
-        <form class="card" id="form" novalidate>
-          <label for="name">Vārds</label>
-          <input id="name" required autocomplete="name">
-          <label for="tel">Tālrunis</label>
-          <input id="tel" type="tel" required autocomplete="tel">
-          <label for="txt">Ziņojums</label>
-          <textarea id="txt" rows="3" required></textarea>
-          <p class="msg" id="msg" role="status"></p>
-          <button class="btn" type="submit">Nosūtīt pieprasījumu</button>
-        </form>
       </div>
     </div>
   </section>
 </main>
 
 <footer class="site">© <span id="year"></span> Liepājas Taksometrs. Visas tiesības aizsargātas.</footer>
+
+<div class="modal" id="order-modal" role="dialog" aria-modal="true" aria-labelledby="order-title" aria-hidden="true">
+  <div class="modal-box order-box">
+    <button type="button" class="close-modal" id="order-close" aria-label="Aizvērt">&times;</button>
+    <h2 id="order-title">Pasūtīt taksometru</h2>
+    <p class="lead" style="margin-bottom:8px">Norādi maršrutu, izvēlies tarifu un apmaksas veidu — kartē vai skaidrā naudā.</p>
+    <form id="form" novalidate>
+        <label for="name">Vārds</label>
+        <input id="name" name="vards" required autocomplete="name">
+        <label for="tel">Tālrunis</label>
+        <input id="tel" name="talrunis" type="tel" required autocomplete="tel" placeholder="20000000">
+        <label for="o-no">No adreses</label>
+        <input id="o-no" name="no" required>
+        <label for="o-uz">Uz adresi</label>
+        <input id="o-uz" name="uz" required>
+        <label for="o-tarifs">Tarifs</label>
+        <select id="o-tarifs" name="tarifs" required>
+          <?php
+            $r = mysqli_query($savienojums, "SELECT tarifs_id, nosaukums, iekrausanas_maksa, cena_km FROM tarifi WHERE statuss = 'aktīvs' ORDER BY tarifs_id");
+            while ($r && ($t = mysqli_fetch_assoc($r))) {
+              echo '<option value="' . (int) $t['tarifs_id'] . '" data-start="' . $t['iekrausanas_maksa'] . '" data-km="' . $t['cena_km'] . '">'
+                 . htmlspecialchars($t['nosaukums']) . '</option>';
+            }
+          ?>
+        </select>
+
+        <label for="o-km">Aptuvenais attālums (km)</label>
+        <input id="o-km" name="km" type="number" min="0.5" max="500" step="0.5" value="5" required>
+        <p class="estimate">Aptuvenā cena: <strong id="o-sum">—</strong></p>
+
+        <div class="pay-opts" role="radiogroup" aria-label="Apmaksas veids">
+          <label><input type="radio" name="maksa" value="nauda" checked> <i class="fa-solid fa-money-bill-wave"></i> Skaidrā naudā</label>
+          <label><input type="radio" name="maksa" value="karte"> <i class="fa-solid fa-credit-card"></i> Kartē</label>
+        </div>
+
+        <p class="msg" id="msg" role="status"></p>
+        <button class="btn" type="submit" id="o-btn">Pasūtīt taksometru</button>
+      </form>
+  </div>
+</div>
 
 <script src="script.js"></script>
 </body>

@@ -39,7 +39,7 @@ $page = basename($_SERVER["PHP_SELF"]);
         </a>
 
         <nav id="admin-nav">
-            <a href="main.php" class="btn <?= $page == 'main.php' ? 'active' : '' ?>">Kopsavilkums</a>
+            <a href="index.php" class="btn <?= $page == 'index.php' ? 'active' : '' ?>">Kopsavilkums</a>
             <a href="autoparks.php" class="btn <?= $page == 'autoparks.php' ? 'active' : '' ?>">Auto parks</a>
             <a href="soferi.php" class="btn <?= $page == 'soferi.php' ? 'active' : '' ?>">Šoferi</a>
             <a href="klienti.php" class="btn <?= $page == 'klienti.php' ? 'active' : '' ?>">Klienti</a>
