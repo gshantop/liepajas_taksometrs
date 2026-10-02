@@ -16,6 +16,7 @@
     --on-road: #f3f1ea;
     --on-road-muted: #b9bdc7;
     --danger: #d64545;
+    --success: #2e9e5b;
     --shadow: 0 1px 2px rgba(20, 22, 26, .06), 0 8px 24px rgba(20, 22, 26, .06);
     --shadow-lg: 0 1px 2px rgba(20, 22, 26, .06), 0 20px 48px rgba(20, 22, 26, .14);
 }
@@ -32,6 +33,7 @@
     --on-road: #f3f1ea;
     --on-road-muted: #b9bdc7;
     --danger: #ef6a6a;
+    --success: #4cc983;
     --shadow: 0 1px 2px rgba(0, 0, 0, .4), 0 8px 24px rgba(0, 0, 0, .35);
     --shadow-lg: 0 1px 2px rgba(0, 0, 0, .5), 0 20px 48px rgba(0, 0, 0, .45);
 }
@@ -993,6 +995,85 @@ header nav {
     margin-left: auto;
 }
 
+#pazinojumi {
+    position: fixed;
+    top: 80px;
+    right: 20px;
+    z-index: 200;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    width: min(380px, calc(100% - 40px));
+    pointer-events: none;
+}
+
+.pazinojums {
+    pointer-events: auto;
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 14px 14px 14px 16px;
+    background: var(--surface);
+    color: var(--text);
+    border: 1px solid var(--line);
+    border-left: 6px solid var(--muted);
+    border-radius: 8px;
+    box-shadow: var(--shadow-lg);
+    font-size: .95rem;
+    font-weight: 600;
+    opacity: 0;
+    transform: translateX(24px);
+    transition: opacity .25s, transform .25s;
+}
+
+.pazinojums.show {
+    opacity: 1;
+    transform: none;
+}
+
+.pazinojums__ikona {
+    font-size: 1.2rem;
+    line-height: 1.4;
+}
+
+.pazinojums__teksts {
+    flex: 1;
+    line-height: 1.4;
+    word-break: break-word;
+}
+
+.pazinojums__aizvert {
+    border: 0;
+    background: transparent;
+    color: var(--muted);
+    cursor: pointer;
+    font-size: 1rem;
+    padding: 2px 4px;
+    transition: color .2s;
+}
+
+.pazinojums__aizvert:hover {
+    color: var(--text);
+}
+
+.pazinojums--veiksme {
+    border-left-color: var(--success);
+    background: color-mix(in srgb, var(--success) 10%, var(--surface));
+}
+
+.pazinojums--veiksme .pazinojums__ikona {
+    color: var(--success);
+}
+
+.pazinojums--kluda {
+    border-left-color: var(--danger);
+    background: color-mix(in srgb, var(--danger) 10%, var(--surface));
+}
+
+.pazinojums--kluda .pazinojums__ikona {
+    color: var(--danger);
+}
+
 /* ---------- Kājene ---------- */
 footer {
     background: var(--surface);
@@ -1100,6 +1181,12 @@ footer.site {
     .theme-toggle {
         top: 14px;
         right: 14px;
+    }
+    
+    #pazinojumi {
+        top: 72px;
+        right: 12px;
+        width: calc(100% - 24px);
     }
 }
 

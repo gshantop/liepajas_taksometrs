@@ -3,6 +3,8 @@ header("Content-Type: application/json; charset=UTF-8");
 
 require "../../database/db_config.php";
 
+mysqli_report(MYSQLI_REPORT_OFF);
+
 if ($savienojums->connect_error) {
     http_response_code(500); // Internal Server Error
     echo json_encode(["error" => "Neizdevās pieslēgties datubāzei"]); 

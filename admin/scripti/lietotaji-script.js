@@ -1,12 +1,15 @@
-console.log("JS darbojas!")
-
 let edit = false;
 
-document.querySelector('#new-btn').addEventListener('click', showModal)
+document.querySelector('#new-btn').addEventListener('click', (e) => {
+    e.preventDefault()
+    showModal()
+})
 document.querySelector('.close-modal').addEventListener('click', hideModal)
 document.addEventListener('click', handleTableClick)
 document.querySelector("#pieteikumuForma").addEventListener('submit', handleFormSubmit)
-document.querySelector('#showPassword').addEventListener('click', () => {
+document.querySelector('#showPassword').addEventListener('click', (e) => {
+    e.preventDefault()
+
     const passwordBlock = document.querySelector('.password')
     const passwordInput = document.querySelector('#parole')
 
@@ -28,20 +31,27 @@ document.querySelector('#confirmDelete').addEventListener('click', async (e) => 
     if(id){
         await deletePieteikums(id)
         await fetchPieteikumi()
-        
+
         document.querySelector('#deleteModal').style.display = 'none'
     }
 })
 
 fetchPieteikumi()
 
+function esc(v){
+    const d = document.createElement('div')
+    d.textContent = v ?? ''
+    return d.innerHTML
+}
+
 function showModal(){
-    document.querySelector('.modal').style.display = 'flex'
+    document.querySelector('#modal-admin').style.display = 'flex'
 }
 
 function hideModal(){
-    document.querySelector('.modal').style.display = 'none'
+    document.querySelector('#modal-admin').style.display = 'none'
     document.querySelector("#pieteikumuForma").reset()
+    document.querySelector('#piet_ID').value = ''
     edit = false
 
     const passwordBlock = document.querySelector('.password')
@@ -56,6 +66,8 @@ async function fetchPieteikumi(){
         const response = await fetch('api/lietotaji-api.php')
         const pieteikumi = await response.json()
 
+        if (!response.ok) throw new Error(pieteikumi.error || 'Kļūda')
+
         let template = ""
         pieteikumi.forEach( p => {
 
@@ -64,12 +76,12 @@ async function fetchPieteikumi(){
             template += `
                     <tr data-id="${p.lietotajs_id}">
                         <td>${p.lietotajs_id}</td>
-                        <td>${p.lietotajvards}</td>
-                        <td>${p.vards}</td>
-                        <td>${p.uzvards}</td>
-                        <td>${p.epasts}</td>
-                        <td>${p.loma}</td>
-                        <td>${p.statuss}</td>
+                        <td>${esc(p.lietotajvards)}</td>
+                        <td>${esc(p.vards)}</td>
+                        <td>${esc(p.uzvards)}</td>
+                        <td>${esc(p.epasts)}</td>
+                        <td>${esc(p.loma)}</td>
+                        <td>${esc(p.statuss)}</td>
                         <td>
                             <a class="pieteikums-item btn-edit"><i class = "fa fa-edit"></i></a>
                             <a class="pieteikums-delete btn-delete"><i class = "fa fa-trash"></i></a>
@@ -81,7 +93,7 @@ async function fetchPieteikumi(){
         document.querySelector("#pieteikumi").innerHTML = template
 
     }catch(err){
-        alert("Neizdevas ielādēt datus!. Mēģiniet vēlreiz!")
+        alert("Neizdevās ielādēt datus! Mēģiniet vēlreiz!")
         console.error(err)
     }
 }
@@ -111,17 +123,19 @@ async function editPieteikums(id){
         const response = await fetch(`api/lietotaji-api.php?id=${id}`)
         const pieteikums = await response.json()
 
+        if (!response.ok) throw new Error(pieteikums.error || 'Kļūda')
+
         document.querySelector("#lietotajvards").value = pieteikums.lietotajvards
         document.querySelector("#vards").value = pieteikums.vards
         document.querySelector("#uzvards").value = pieteikums.uzvards
         document.querySelector("#epasts").value = pieteikums.epasts
         document.querySelector("#loma").value = pieteikums.loma
         document.querySelector("#piet_ID").value = pieteikums.lietotajs_id
-        
+
         edit = true
         showModal()
     }catch(err){
-        alert("Neizdevas ielādēt lietotaju!. Mēģiniet vēlreiz!")
+        alert("Neizdevās ielādēt lietotāju! Mēģiniet vēlreiz!")
         console.error(err)
     }
 }
@@ -141,24 +155,27 @@ async function handleFormSubmit(e){
 
     if (paroleValue.trim() !== "") {
         formData.parole = paroleValue
-    }   
+    }
 
     const id = document.querySelector('#piet_ID').value
     const method = edit ? 'PUT' : 'POST'
     const url = edit ? `api/lietotaji-api.php?id=${id}` : 'api/lietotaji-api.php'
 
     try{
-        await fetch(url, {
+        const response = await fetch(url, {
             method: method,
             headers: {'Content-Type':'application/json'},
             body: JSON.stringify(formData)
         })
-        
+
+        // Kļūdas gadījumā paziņojumu parāda pazinojumi.js, forma paliek atvērta
+        if (!response.ok) return
+
         hideModal()
         await fetchPieteikumi()
 
     }catch(err){
-        alert("Neizdevas saglabāt lietotaju!. Mēģiniet vēlreiz!")
+        alert("Neizdevās saglabāt lietotāju! Mēģiniet vēlreiz!")
         console.error(err)
     }
 
@@ -169,8 +186,10 @@ async function deletePieteikumsModal(id){
         const response = await fetch(`api/lietotaji-api.php?id=${id}`)
         const pieteikums = await response.json()
 
+        if (!response.ok) throw new Error(pieteikums.error || 'Kļūda')
+
         document.querySelector('#deleteMessage span').textContent = pieteikums.lietotajvards
-        
+
         document.querySelector('#confirmDelete').setAttribute('data-id', id)
 
         document.querySelector('#deleteModal').style.display = 'flex'
@@ -187,7 +206,7 @@ async function deletePieteikums(id){
             method: 'DELETE'
         })
     }catch(err){
-        alert("Neizdevas dzēst lietotaju!. Mēģiniet vēlreiz!")
+        alert("Neizdevās dzēst lietotāju! Mēģiniet vēlreiz!")
         console.error(err)
     }
 }

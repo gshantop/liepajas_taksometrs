@@ -26,10 +26,7 @@ $page = basename($_SERVER["PHP_SELF"]);
         })();
     </script>
 
-    <!-- style.css atrodas saknes mapē, nevis admin mapē -->
-    <link rel="stylesheet" href="../style.css?v=5">
-
-    <!-- Fonti, kurus izmanto style.css -->
+    <link rel="stylesheet" href="../style.css?v=6">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;600;700;800&family=Archivo+Narrow:wght@700&display=swap">
@@ -53,7 +50,6 @@ $page = basename($_SERVER["PHP_SELF"]);
             <a href="logout.php" class="btn" aria-label="Iziet"><i class="fas fa-power-off"></i><span class="mob-only"> Iziet</span></a>
         </nav>
 
-        <!-- Krāsu režīms un hamburgers -->
         <div class="header-tools">
             <button type="button" class="icon-btn" id="theme" aria-label="Mainīt krāsu režīmu" title="Gaišais / tumšais režīms">
                 <i class="fa-solid fa-moon"></i>
@@ -90,5 +86,5 @@ $page = basename($_SERVER["PHP_SELF"]);
             });
         })();
     </script>
-
+    <script src="scripti/pazinojumi.js?v=1"></script>
     <main>
