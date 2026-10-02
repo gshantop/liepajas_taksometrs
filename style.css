@@ -981,6 +981,18 @@ textarea:focus {
     display: none;
 }
 
+.header-tools {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    order: 2;
+}
+
+header nav {
+    order: 1;
+    margin-left: auto;
+}
+
 /* ---------- Kājene ---------- */
 footer {
     background: var(--surface);
@@ -1033,6 +1045,8 @@ footer.site {
         width: 100%;
         gap: 4px;
         padding-bottom: 8px;
+        order: 3;
+        margin-left: 0;
     }
 
     header nav.open {

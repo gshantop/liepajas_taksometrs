@@ -9,14 +9,25 @@ if (!isset($_SESSION["lietotajvards_GSHT"])) {
 $page = basename($_SERVER["PHP_SELF"]);
 ?>
 <!DOCTYPE html>
-<html lang="lv" class="admin-dashboard">
+<html lang="lv" class="admin-dashboard" data-theme="light">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Taksometru pārvaldības sistēma</title>
 
+    <!-- Tēma tiek uzstādīta pirms lapas zīmēšanas, lai nebūtu mirgošanas -->
+    <script>
+        (function () {
+            try {
+                var t = localStorage.getItem('taxi-theme');
+                if (!t) t = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+                document.documentElement.setAttribute('data-theme', t);
+            } catch (e) {}
+        })();
+    </script>
+
     <!-- style.css atrodas saknes mapē, nevis admin mapē -->
-    <link rel="stylesheet" href="../style.css?v=4">
+    <link rel="stylesheet" href="../style.css?v=5">
 
     <!-- Fonti, kurus izmanto style.css -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -30,11 +41,6 @@ $page = basename($_SERVER["PHP_SELF"]);
             <i class="fa-solid fa-taxi"></i> Taksometru pārvaldība
         </a>
 
-        <!-- Hamburgera poga (redzama tikai šaurā ekrānā) -->
-        <button type="button" class="icon-btn" id="burger" aria-label="Izvēlne" aria-expanded="false" aria-controls="admin-nav">
-            <i class="fa-solid fa-bars"></i>
-        </button>
-
         <nav id="admin-nav">
             <a href="main.php" class="btn <?= $page == 'main.php' ? 'active' : '' ?>">Kopsavilkums</a>
             <a href="autoparks.php" class="btn <?= $page == 'autoparks.php' ? 'active' : '' ?>">Auto parks</a>
@@ -46,19 +52,43 @@ $page = basename($_SERVER["PHP_SELF"]);
             <a href="#" class="btn"><i class="fa-solid fa-user"></i> <?= htmlspecialchars($_SESSION["lietotajvards_GSHT"]) ?></a>
             <a href="logout.php" class="btn" aria-label="Iziet"><i class="fas fa-power-off"></i><span class="mob-only"> Iziet</span></a>
         </nav>
+
+        <!-- Krāsu režīms un hamburgers -->
+        <div class="header-tools">
+            <button type="button" class="icon-btn" id="theme" aria-label="Mainīt krāsu režīmu" title="Gaišais / tumšais režīms">
+                <i class="fa-solid fa-moon"></i>
+            </button>
+            <button type="button" class="icon-btn" id="burger" aria-label="Izvēlne" aria-expanded="false" aria-controls="admin-nav">
+                <i class="fa-solid fa-bars"></i>
+            </button>
+        </div>
     </header>
 
     <script>
         (function () {
-            const burger = document.querySelector('#burger')
-            const nav = document.querySelector('#admin-nav')
+            var root = document.documentElement;
+            var themeBtn = document.getElementById('theme');
 
-            burger.addEventListener('click', () => {
-                const open = nav.classList.toggle('open')
-                burger.setAttribute('aria-expanded', open)
-                burger.querySelector('i').className = open ? 'fa-solid fa-xmark' : 'fa-solid fa-bars'
-            })
-        })()
+            function apply(t) {
+                root.setAttribute('data-theme', t);
+                themeBtn.innerHTML = t === 'dark' ? '<i class="fa-solid fa-sun"></i>' : '<i class="fa-solid fa-moon"></i>';
+                try { localStorage.setItem('taxi-theme', t); } catch (e) {}
+            }
+
+            themeBtn.addEventListener('click', function () {
+                apply(root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
+            });
+            apply(root.getAttribute('data-theme'));
+
+            var burger = document.getElementById('burger');
+            var nav = document.getElementById('admin-nav');
+
+            burger.addEventListener('click', function () {
+                var open = nav.classList.toggle('open');
+                burger.setAttribute('aria-expanded', open);
+                burger.querySelector('i').className = open ? 'fa-solid fa-xmark' : 'fa-solid fa-bars';
+            });
+        })();
     </script>
 
     <main>
